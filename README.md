@@ -1,4 +1,4 @@
 # HRP Portfolio Optimization
 
 Members:
-- [insert name]
+- [Santiago Diaz Tolivia]
