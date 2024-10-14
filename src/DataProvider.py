@@ -19,9 +19,22 @@ class DataProvider:
         self.clean()
         return self.data
 
-    def clean(self) -> None:
+    def clean(self, brute = True) -> None:
         """
         Clean up the data
         """
-        self.data = self.data.dropna()
+        if self.data.isnull().values.any():
+            print("The dataset contains null or empty values")
+            print("Pefroming cleaning")
+            if brute:
+                self.data = self.data.dropna()
+            else: # TODO: the code below has not been tested
+                missing_fractions = self.data.isnull().mean().sort_values(ascending=False)
+                missing_fractions.head(10)
+                drop_list = sorted(list(missing_fractions[missing_fractions > 0.3].index))
+                self.data.drop(labels=drop_list, axis=1, inplace=True)
+                # fill the missing values with the last value available in the dataset.
+                self.data = self.data.fillna(method='ffill')
+        else:
+            print("The dataset contains no null values")
         return True
