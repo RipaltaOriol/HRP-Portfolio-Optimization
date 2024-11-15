@@ -1,7 +1,7 @@
 import yfinance as yf
 import pandas as pd
 from typing import List
-from ticker_codes import etf_ticker_universe
+from src.ticker_codes import etf_ticker_universe
 
 class DataProvider:
     def __init__(self, tickers: List[str], start: str, end: str, target: str = "Adj Close") -> None:
