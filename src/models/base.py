@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 
+
 class WeightAllocationModel:
 
     ticker_list = None
@@ -9,7 +10,7 @@ class WeightAllocationModel:
     def __init__(self):
         pass
 
-    def weights_allocate(self, date_from, date_to, ticker_list, **params):
+    def weights_allocate(self, date_from, date_to, data, ticker_list, **params):
         """
         This is where all predictions are made. The predictions must be returned in a DataFrame format and specifically,
         having as index date datetime, columns the ticker names, and values the weights for each ticker for the current date

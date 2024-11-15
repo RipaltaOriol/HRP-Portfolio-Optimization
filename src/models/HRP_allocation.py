@@ -4,8 +4,13 @@ from base import WeightAllocationModel
 
 # TODO: understand this functions and clean them up
 class HRP(WeightAllocationModel):
-    def __init__(self):
-        pass
+    def __init__(self, months_back=3):
+        super(HRP, self).__init__()
+        self.months_back = 3
+
+    def date_data_needed(self, date_from, date_to):
+
+        return date_from - pd.DateOffset(months=self.months_back)
 
     def getQuasiDiag(self, link):
         """
@@ -38,8 +43,6 @@ class HRP(WeightAllocationModel):
         cVar=np.dot(np.dot(w_.T,cov_),w_)[0,0]
         return cVar
 
-
-
     def getRecBipart(self, cov, sortIx):
         # Compute HRP alloc
         w = pd.Series(1, index=sortIx)
@@ -55,3 +58,7 @@ class HRP(WeightAllocationModel):
                 w[cItems0] *= alpha  # weight 1
                 w[cItems1] *= 1 - alpha  # weight 2
         return w
+
+    def weights_allocate(self, date_from, date_to, data, ticker_list, **params):
+
+        pass

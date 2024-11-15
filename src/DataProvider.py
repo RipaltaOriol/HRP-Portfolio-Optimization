@@ -1,25 +1,28 @@
-import yfinance as yf
 import pandas as pd
+import yfinance as yf
 from typing import List
-from ticker_codes import etf_ticker_universe
+import datetime
+from .ticker_codes import etf_ticker_universe
+
 
 class DataProvider:
-    def __init__(self, tickers: List[str], start: str, end: str, target: str = "Adj Close") -> None:
+    def __init__(self, start: datetime.date, end: datetime.date, tickers: List[str], target: str = "Adj Close") -> None:
+        """
+        Initialize the DataProvider with start and end dates as datetime.date objects, and a list of tickers.
+        """
         self.tickers = tickers
         self.start = start
         self.end = end
-        self.data = pd.DataFrame() # initialize to empty
+        self.data = pd.DataFrame()  # Initialize to empty
         self.target = target
 
-        self.eft_ticker_map = etf_ticker_universe
-
     def fetch(self) -> pd.DataFrame:
-        """
-        Fetches historical for the specified asset classes.
-        """
-        self.data = yf.download(self.tickers, self.start, self.end)
+        start_str = self.start.strftime('%Y-%m-%d')
+        end_str = self.end.strftime('%Y-%m-%d')
+        self.data = yf.download(self.tickers, start=start_str, end=end_str)
         self.data = self.data[self.target] if self.target else self.data
-        self.clean()
+        self.data.index = self.data.index.tz_localize(None)
+
         return self.data
 
     def clean(self, brute = True) -> None:

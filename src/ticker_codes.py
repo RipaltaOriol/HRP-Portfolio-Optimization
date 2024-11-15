@@ -48,3 +48,11 @@ real_estate_tickers = ["O", "AMT", "EQIX", "SPG"]
 etf_ticker_universe = {'xlb': materials_tickers, 'xlc': communication_services_tickers, 'xle': energy_tickers, 'xlf': financials_tickers, 'xli': industrials_tickers,
     'xlk': technology_tickers, 'xlp': consumer_staples_tickers, 'xlu': utilities_tickers, 'xlv': health_care_tickers, 'xly': consumer_discretionary_tickers,
     'xlre': real_estate_tickers}
+
+tickers = [
+    "AAPL", "MSFT", "AMZN", "GOOGL", "FB", "TSLA", "BRK.B", "NVDA", "JNJ", "JPM",
+    "V", "PG", "UNH", "HD", "MA", "DIS", "PYPL", "NFLX", "ADBE", "KO",
+    "PFE", "NKE", "PEP", "MRK", "CSCO", "ABT", "CRM", "AVGO", "CMCSA", "T",
+    "XOM", "CVX", "WMT", "INTC", "AMD", "BA", "COST", "QCOM", "TXN", "ORCL",
+    "MMM", "HON", "AMGN", "SPGI", "CAT", "GS", "MDT", "BLK", "USB", "LMT"
+]

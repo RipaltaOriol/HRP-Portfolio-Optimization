@@ -1,23 +1,30 @@
 import pandas as pd
-from agent import  Agent
+from src.agents import Agent
 import copy
-
-
+from src. DataProvider import DataProvider
+import os
+from src.models.base import WeightAllocationModel
 
 class Backtester:
 
     def __init__(self,start_date, end_date, ticker_list, benchmarks, save=False):
         self.start_date = start_date
         self.end_date = end_date
-        self.ticker_list = ticker_list
+        self.tickers = ticker_list
         self.benchmarks = benchmarks
-        self.save = save
 
         self.data_from = None
+        self.data = None
+
         self.agents = []
         self.new_agents = []
         self.changed_agents = []
         self.benchmarks = benchmarks
+        self.results = {}
+        self.excel_writer = None
+
+        self.save = save
+        WeightAllocationModel.save = save
 
     def data_date_from(self):
 
@@ -33,6 +40,8 @@ class Backtester:
 
         if self.new_agents:
             self.data_from = self.data_date_from()
+            data_provider = DataProvider(self.data_from, self.end_date, self.tickers)
+            self.data = data_provider.fetch()
 
             if self.data_from is None:
                 raise ValueError("You have to provide agents for evaluations")
@@ -62,13 +71,13 @@ class Backtester:
         self.agents = []
 
 
-    def agents_predict(self):
+    def agents_allocate(self):
         """
-        In this method all agents, one by one, predict their backcasts for the simulation period.
+        In this method all agents, one by one, predict their backtests for the simulation period.
         """
         for agent in self.new_agents:
             print(f"Predictions for {agent}, are being calculated.")
-            agent.predict(self.start_date, self.end_date, self.ticker_list)
+            agent.weights_allocate(self.start_date, self.end_date, self.tickers, self.data)
             print(f"Predictions for {agent}, done.\n")
 
     def evaluate_agents(self, benchmarks=None):
@@ -80,23 +89,133 @@ class Backtester:
         :return: Dictionary with the specified format.
         """
         try:
-            quantities = self.agents[0].quantities
+            weight_predictions = self.agents[0].weight_predictions
         except:
             raise ValueError(
-                "Agents haven't decided their quantities yet please run agents_decide first!"
+                "Agents haven't decided their weights for the whole period yet, please run agent.weights_allocate first!"
             )
 
         results = {
-            "D": pd.DataFrame(index=quantities.groupby([quantities.index.date]).sum().index),
-            "W": pd.DataFrame(index=quantities.groupby([quantities.index.year, quantities.index.isocalendar().week]).sum().index),
-            "M": pd.DataFrame(index=quantities.groupby([quantities.index.month]).sum().index),
-            "Y": pd.DataFrame(index=quantities.groupby([quantities.index.year]).sum().index),
-            "YM": pd.DataFrame(index=quantities.groupby([quantities.index.year, quantities.index.month]).sum().index),
+            "D": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.date]).sum().index),
+            "W": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year, weight_predictions.index.isocalendar().week]).sum().index),
+            "M": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.month]).sum().index),
+            "Y": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year]).sum().index),
+            "YM": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year, weight_predictions.index.month]).sum().index),
             "P": pd.DataFrame(),
         }
         for agent in self.agents:
             self.results[agent.sheet_name()] = copy.deepcopy(results)
             for benchmark in benchmarks:
-                benchmark_result = benchmark.calculate(agent.weight_predictions, self.ticker_list)
+                benchmark_result = benchmark.calculate(agent.weight_predictions, self.tickers, self.data)
                 self.results[agent.sheet_name()][benchmark.freq][benchmark.name] = benchmark_result
         return self.results
+
+    def run(self):
+        """
+        Runs the simulation for all agents added. After the run has ended all agents have their predictions and
+        quantities calculated.
+        """
+        # Get data
+        self.get_data()
+
+        # Agents calculate the weight allocations
+        self.agents_allocate()
+
+    def run_n_evaluate(self):
+        """
+        Runs the simulation and evaluate the agents. Returns the dictionary with the results.
+        :return: Dictionary with the specified format see evaluate_agents for details on format.
+        """
+        # Run first
+        self.run()
+
+        # Evaluate the agents based on the actual prices
+        results = self.evaluate_agents(self.benchmarks)
+
+        return results
+
+    def results_to_excel(self, filename: str, save_dir=".", disp=False):
+        """
+        Export the results of the simulation to an excel file so that they are in more human-readable format.
+        :param filename: Filename of the excel file.
+        :param save_dir: Directory in which the file will be saved relevant to the backtesting project.
+        :param disp: Bool parameter wheter to print results or not while exporting the,
+        """
+        if self.results == {}:
+            raise ValueError("Please run evaluate first to create the results.")
+
+        filepath = os.path.join(os.path.dirname(__file__), '..', save_dir, filename)
+        count = 1
+        while os.path.exists(filepath):
+            name = filename.split('.')
+            filepath = os.path.join(os.path.dirname(__file__), '..', save_dir, name[0] + f" ({count})." + name[1])
+            count += 1
+        # Open the same excel file only one time.
+        if self.excel_writer is None:
+            self.excel_writer = pd.ExcelWriter(filepath)
+        else:
+            if filepath != self.excel_writer.path:
+                self.excel_writer.save()
+                self.excel_writer = pd.ExcelWriter(filepath)
+
+        for i, (agent, agent_results) in enumerate(self.results.items()):
+
+            # Here you have access to every model's results separately.
+            if disp:
+                print(agent)
+            row = 0
+            for frequency, frequency_results in agent_results.items():
+                if frequency_results.empty:
+                    continue
+                if disp:
+                    pd.set_option("display.max_rows", None, "display.max_columns", None)
+                    print(f"For frequency {frequency} the results are:\n{frequency_results}")
+                try:
+                    frequency_results.to_excel(excel_writer=self.excel_writer, sheet_name=agent, startrow=row, float_format="%.2f")
+                    row += frequency_results.shape[0] + 1
+                except Exception as ex:
+                    raise ValueError("Failed to write to excel because: {}".format(ex))
+
+    def results_to_excel2(self, filename: str, save_dir=".", disp=False):
+        """
+        Export the results of the simulation to an Excel file and display them in the console.
+        :param filename: Filename of the Excel file.
+        :param save_dir: Directory in which the file will be saved relative to the backtesting project.
+        :param disp: Boolean parameter to print results in the console.
+        """
+        if not self.results:
+            raise ValueError("Please run evaluate_agents first to generate the results.")
+
+        # Construct file path
+        filepath = os.path.abspath(os.path.join(save_dir, filename))
+        count = 1
+        while os.path.exists(filepath):
+            name, ext = os.path.splitext(filename)
+            filepath = os.path.abspath(os.path.join(save_dir, f"{name} ({count}){ext}"))
+            count += 1
+
+        # Create a new Excel writer
+        with pd.ExcelWriter(filepath, engine="xlsxwriter") as writer:
+            for agent, agent_results in self.results.items():
+                if disp:
+                    print(f"Agent: {agent}")
+
+                row = 0
+                for frequency, frequency_results in agent_results.items():
+                    if frequency_results.empty:
+                        continue
+
+                    if disp:
+                        print(f"\nFrequency: {frequency}")
+                        print(frequency_results)
+
+                    try:
+                        # Write results to Excel
+                        frequency_results.to_excel(writer, sheet_name=agent[:31],  # Excel sheet name limit is 31 characters
+                            startrow=row, float_format="%.2f", )
+                        row += frequency_results.shape[0] + 2  # Leave a gap between sections
+                    except Exception as ex:
+                        raise ValueError(f"Failed to write to Excel: {ex}")
+
+        if disp:
+            print(f"\nResults successfully saved to: {filepath}")

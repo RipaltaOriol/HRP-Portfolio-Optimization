@@ -3,11 +3,11 @@ from deepdiff import DeepHash
 
 class Benchmark:
 
-    def __init__(self, name='Base_Benchmark', freq='B'):
+    def __init__(self, name='Base_Benchmark', freq='M', starting_capital=10000000):
         self.name = name
         self.freq = freq
 
-    def calculate(self, weight_allocations, ticker_list, **kwargs):
+    def calculate(self, weight_allocations, ticker_list, data, **kwargs):
         pass
 
     def __hash__(self):
