@@ -3,6 +3,7 @@ from transformers import pipeline
 from transformers import DebertaTokenizer, DebertaForSequenceClassification
 
 
+
 # Load the tokenizer and model
 tokenizer = BertTokenizer.from_pretrained('yiyanghkust/finbert-tone')
 model = BertForSequenceClassification.from_pretrained('yiyanghkust/finbert-tone')
@@ -17,5 +18,5 @@ result = nlp([' In August, second-quarter earnings and revenue topped analyst es
              'The CEO fired 5% of the company to reduce costs',
              'The CEO fired 5% of the company'])
 
-print(nlp)
+print(result)
 

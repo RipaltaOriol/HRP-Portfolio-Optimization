@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
+from base import WeightAllocationModel
 
 # TODO: understand this functions and clean them up
-class HRP:
+class HRP(WeightAllocationModel):
     def __init__(self):
         pass
 
