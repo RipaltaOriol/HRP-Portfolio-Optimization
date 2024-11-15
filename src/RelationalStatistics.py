@@ -1,5 +1,6 @@
 import pandas as pd
-
+from sklearn.metrics.pairwise import euclidean_distances
+import numpy as np
 class RelationalStatistics():
 
     def __init__(self, data)-> None:
@@ -20,7 +21,46 @@ class RelationalStatistics():
         """
         return self.data.corr()
     
-    def fetch_shrinkage_covariance(self, shrinkage=0.1) -> pd.Data:
+
+    def fetch_distance(self) -> pd.DataFrame:
+        """
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        Correlation-Distance matrix
+        """
+
+        # Calculate the distance matrix
+        distance_matrix = (0.5*(1- self.fetch_correlation_matrix()))**0.5
+
+        return distance_matrix
+    
+    def fetch_eucledian_distance(self):
+        """
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        Correlation-Distance matrix
+        """
+
+        # Calculate the distance matrix
+        distance_matrix = self.fetch_distance() # Possible redundancy, distance matrix is being calculated twice
+
+        # Calculate the eucledian distance matrix
+        euclidean_distance_matrix = euclidean_distances(distance_matrix.values)
+
+        # Convert to pandas dataframe
+        euclidean_distance_matrix = pd.DataFrame(euclidean_distance_matrix, index=distance_matrix.columns, columns=distance_matrix.columns)
+
+        return euclidean_distance_matrix
+    
+    def fetch_shrinkage_covariance(self, shrinkage=0.1) -> pd.DataFrame:
         """
         Fetches shrinkage covariance matrix using Ledoit-Wolf shrinkage method.
         
