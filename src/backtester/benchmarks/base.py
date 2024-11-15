@@ -6,8 +6,9 @@ class Benchmark:
     def __init__(self, name='Base_Benchmark', freq='M', starting_capital=10000000):
         self.name = name
         self.freq = freq
+        self.starting_capital = starting_capital
 
-    def calculate(self, weight_allocations, ticker_list, data, **kwargs):
+    def calculate(self, weight_predictions, ticker_list, data, **kwargs):
         pass
 
     def __hash__(self):

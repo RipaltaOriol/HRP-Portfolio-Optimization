@@ -6,6 +6,7 @@ import datetime as dt
 
 class RandomAllocation(WeightAllocationModel):
 
+
     def __init__(self, months_back):
         super(RandomAllocation, self).__init__()
         self.months_back = months_back
@@ -58,6 +59,7 @@ class RandomAllocation(WeightAllocationModel):
 
         weight_predictions = weight_predictions.sort_index()
         weight_predictions.columns = ticker_list
+
 
         return weight_predictions
 

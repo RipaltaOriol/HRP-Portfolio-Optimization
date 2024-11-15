@@ -35,7 +35,7 @@ back_tester.results_to_excel2(
 )
 
 # call save once on exit, even if multiple files were created during the simulation.
-back_tester.excel_writer.save()
+
 
 
 
