@@ -13,7 +13,7 @@ This file contains the HRPPortfolio class. This class will have the following at
 class HRPPortfolio:
 
     def __init__(self, correlation_matrix):
-        self.corelation_matrix = corelation_matrix
+        self.correlation_matrix = correlation_matrix
     
     def distance_matrix(self, correlation_matrix):
         """
@@ -58,22 +58,6 @@ class HRPPortfolio:
     def recursive_bisection(self, clustered_correlations):
         return weights
 
-
-
-"""
-Parameters
-----------
-input1 : dtype 
-    what is it?
-input2 : dtype 
-    what is it?
-input3 : dtype 
-    what is it?
-
-Returns
--------
-What does the function return.
-"""
     
 
     
