@@ -7,7 +7,7 @@ class Benchmark:
         self.name = name
         self.freq = freq
 
-    def calculate(self, quantities, ticker_list, **kwargs):
+    def calculate(self, weight_allocations, ticker_list, **kwargs):
         pass
 
     def __hash__(self):
@@ -15,9 +15,7 @@ class Benchmark:
 
     @staticmethod
     def groupby_freq(dataframe, freq):
-        if freq == 'H':
-            return dataframe.groupby([dataframe.index.date, dataframe.index.hour])
-        elif freq == 'D':
+        if freq == 'D':
             return dataframe.groupby([dataframe.index.date])
         elif freq == 'W':
             return dataframe.groupby([dataframe.index.year, dataframe.index.isocalendar().week])
@@ -27,8 +25,6 @@ class Benchmark:
             return dataframe.groupby([dataframe.index.year])
         elif freq == 'YM':
             return dataframe.groupby([dataframe.index.year, dataframe.index.month])
-        elif freq == 'YH':
-            return dataframe.groupby([dataframe.index.year, dataframe.index.hour])
         elif freq == 'P':
             return dataframe
 

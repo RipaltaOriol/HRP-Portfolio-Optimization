@@ -92,13 +92,11 @@ class Backtester:
             "M": pd.DataFrame(index=quantities.groupby([quantities.index.month]).sum().index),
             "Y": pd.DataFrame(index=quantities.groupby([quantities.index.year]).sum().index),
             "YM": pd.DataFrame(index=quantities.groupby([quantities.index.year, quantities.index.month]).sum().index),
-            "YH": pd.DataFrame(index=quantities.groupby([quantities.index.year, quantities.index.hour]).sum().index),
             "P": pd.DataFrame(),
-            "H": pd.DataFrame(index=quantities.groupby([quantities.index.date, quantities.index.hour]).sum().index),
         }
         for agent in self.agents:
             self.results[agent.sheet_name()] = copy.deepcopy(results)
             for benchmark in benchmarks:
-                benchmark_result = benchmark.calculate(agent.quantities, start_date, end_date, ticker_list,predictions=agent.predictions)
+                benchmark_result = benchmark.calculate(agent.weight_predictions, self.ticker_list)
                 self.results[agent.sheet_name()][benchmark.freq][benchmark.name] = benchmark_result
         return self.results
