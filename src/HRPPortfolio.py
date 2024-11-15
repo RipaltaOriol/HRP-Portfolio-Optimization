@@ -36,7 +36,7 @@ class HRPPortfolio:
 
         return linkage_matrix
 
-    def quasi_diagonalization(self, cluster_order, covariance_matrix):
+    def quasi_diagonalization(self, cluster_order):
         '''Takes the linkage matrix and cluster order and orders the matrix so that 
         the highest correlations are along the diagonal'''
         matrix = self.stats_module.fetch_covariance_matrix()    
@@ -44,6 +44,7 @@ class HRPPortfolio:
         return reordered_matrix
     
     def hrp_recursive_bisection(self, reordered_matrix, cluster_order, linkage_matrix):
+        '''This function performs the recursive bisection method on the given ordered matrix and outputs the weights'''
         n = len(cluster_order)
 
         if n == 1:
