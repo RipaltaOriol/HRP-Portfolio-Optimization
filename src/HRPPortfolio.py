@@ -32,11 +32,29 @@ class HRPPortfolio():
         linkage_matrix = linkage(self.stats_module.fetch_eucledian_distance(), 'centroid')
 
         return linkage_matrix
+    
+    def get_cluster_order(linkage_matrix):
+        '''Takes the linkage matrix and returns the cluster order'''
+
+        n = len(linkage_matrix) + 1  
+        cluster_order = list(range(n))  
+    
+        for i in range(len(linkage_matrix)):
+            
+            left, right = int(linkage_matrix[i, 0]), int(linkage_matrix[i, 1])
+        
+            new_cluster = n + i  
+        
+            cluster_order.remove(left)
+            cluster_order.remove(right)
+            cluster_order.append(new_cluster)
+        
+        return cluster_order
 
     def quasi_diagonalization(self, cluster_order):
         '''Takes the linkage matrix and cluster order and orders the matrix so that 
         the highest correlations are along the diagonal'''
-        matrix = self.statsmodule.covariance_matrix
+        matrix = self.stats_module.fetch_covariance_matrix()
         reordered_matrix = matrix[np.ix_(cluster_order, cluster_order)]
         return reordered_matrix
     
