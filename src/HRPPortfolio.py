@@ -5,6 +5,8 @@ import scipy.cluster.hierarchy as sch
 from sklearn.metrics.pairwise import euclidean_distances
 from scipy.cluster.hierarchy import dendrogram, linkage
 from src import RelationalStatistics
+from src.RelationalStatistics import RelationalStatistics
+
 
 
 """
@@ -12,10 +14,10 @@ This file contains the HRPPortfolio class. This class will have the following at
 1. 
 """
 
-class HRPPortfolio():
+class HRPPortfolio:
 
-    def __init__(self):
-        self.stats_module = RelationalStatistics()
+    def __init__(self, data):
+        self.stats_module = RelationalStatistics(data)
 
     def hierarchical_clustering(self):
         """
@@ -27,16 +29,17 @@ class HRPPortfolio():
         -------
         Correlation-Distance matrix
         """
+        eucledian_df = self.stats_module.fetch_eucledian_distance()
 
         # Calculate the eucledian distance between the stocks - will be using centroid linkage method
-        linkage_matrix = linkage(self.stats_module.fetch_eucledian_distance(), 'centroid')
+        linkage_matrix = linkage(eucledian_df, 'centroid')
 
         return linkage_matrix
 
     def quasi_diagonalization(self, cluster_order, covariance_matrix):
         '''Takes the linkage matrix and cluster order and orders the matrix so that 
         the highest correlations are along the diagonal'''
-        matrix = covariance_matrix
+        matrix = self.stats_module.fetch_covariance_matrix()    
         reordered_matrix = matrix[np.ix_(cluster_order, cluster_order)]
         return reordered_matrix
     
