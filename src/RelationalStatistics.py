@@ -20,7 +20,7 @@ class RelationalStatistics():
         """
         return self.data.corr()
     
-    def fetch_shrinkage_covariance(self, shrinkage=0.1) -> pd.DataFrame:
+    def fetch_shrinkage_covariance(self, shrinkage=0.1) -> pd.Data:
         """
         Fetches shrinkage covariance matrix using Ledoit-Wolf shrinkage method.
         
