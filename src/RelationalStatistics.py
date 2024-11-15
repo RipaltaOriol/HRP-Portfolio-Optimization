@@ -1,7 +1,7 @@
 import pandas as pd
 from sklearn.metrics.pairwise import euclidean_distances
 import numpy as np
-class RelationalStatistics():
+class RelationalStatistics:
 
     def __init__(self, data)-> None:
         """
