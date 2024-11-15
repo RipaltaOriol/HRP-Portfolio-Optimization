@@ -4,6 +4,7 @@ Members:
 
 - Santiago Diaz Tolivia
 - Oriol Ripalta I Maso
+- Evi Prousanidou
 
 ## Motivation
 
