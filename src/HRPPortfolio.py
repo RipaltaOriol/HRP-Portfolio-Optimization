@@ -16,7 +16,7 @@ class HRPPortfolio:
         self.covariance_matrix = covariance_matrix
         self.corelation_matrix = correlation_matrix
     
-    def distance_matrix(self, correlation_matrix):
+    def distance(self, correlation_matrix):
         """
         Parameters
         ----------
@@ -27,10 +27,10 @@ class HRPPortfolio:
         -------
         Correlation-Distance matrix
         """
-        distance = (0.5*(1- correlation_matrix))**0.5
-        return distance
+        distance_matrix = (0.5*(1- correlation_matrix))**0.5
+        return distance_matrix
     
-    def eucledian_distance_matrix(self, correlation_matrix):
+    def eucledian_distance(self, correlation_matrix):
         """
         Parameters
         ----------
@@ -43,12 +43,12 @@ class HRPPortfolio:
         """
 
         # Calculate the distance matrix
-        distance = self.distance_matrix(correlation_matrix) # Possible redundancy, distance matrix is being calculated twice
+        distance_matrix = self.distance(correlation_matrix) # Possible redundancy, distance matrix is being calculated twice
 
         # Calculate the eucledian distance matrix
-        euclidean_distance = euclidean_distances(distance.values)
+        euclidean_distance_matrix = euclidean_distances(distance_matrix.values)
 
-        return euclidean_distance 
+        return euclidean_distance_matrix 
 
     def hierarchical_clustering(self):
         return linkage_matrix
