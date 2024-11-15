@@ -17,8 +17,8 @@ class PNL(Benchmark):
         weight_weight_predictions = weight_weight_predictions.reindex(daily_returns.index).ffill().fillna(0)
 
         portfolio_pnl = (weight_weight_predictions * daily_returns).sum(axis=1)
-        portfolio_pnl_cumsum = portfolio_pnl.cumsum()
-        portfolio_pnl_df = portfolio_pnl_cumsum.to_frame(name="Portfolio PnL")
+        #portfolio_pnl_cumsum = portfolio_pnl.cumsum()
+        portfolio_pnl_df = portfolio_pnl.to_frame(name="Portfolio PnL")
 
         grouped_pnl = self.groupby_freq(portfolio_pnl_df, self.freq).sum()
 
