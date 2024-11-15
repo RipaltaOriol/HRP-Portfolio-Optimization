@@ -12,8 +12,9 @@ This file contains the HRPPortfolio class. This class will have the following at
 
 class HRPPortfolio:
 
-    def __init__(self, correlation_matrix):
-        self.correlation_matrix = correlation_matrix
+    def __init__(self, correlation_matrix, covariance_matrix):
+        self.covariance_matrix = covariance_matrix
+        self.corelation_matrix = correlation_matrix
     
     def distance(self, correlation_matrix):
         """
@@ -52,12 +53,32 @@ class HRPPortfolio:
     def hierarchical_clustering(self):
         return linkage_matrix
 
-    def quasi_diagonalization(self, linkage_matrix):
-        return clustered_correlations
+    def quasi_diagonalization(self, cluster_order, covariance_matrix):
+        '''Takes the linkage matrix and cluster order and orders the matrix so that 
+        the highest correlations are along the diagonal'''
+        matrix = covariance_matrix
+        reordered_matrix = matrix[np.ix_(cluster_order, cluster_order)]
+        return reordered_matrix
     
-    def recursive_bisection(self, clustered_correlations):
+    def recursive_bisection(self, reordered_matrix):
         return weights
 
+
+
+# """
+# Parameters
+# ----------
+# input1 : dtype 
+#     what is it?
+# input2 : dtype 
+#     what is it?
+# input3 : dtype 
+#     what is it?
+
+# Returns
+# -------
+# What does the function return.
+# """
     
 
     
