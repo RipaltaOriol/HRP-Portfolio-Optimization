@@ -6,6 +6,7 @@ class HRP:
     def __init__(self):
         pass
 
+
     def getQuasiDiag(self, link):
         """
         A 'quasi-diagonalization' is a process usually known as matrix seriation and which can
