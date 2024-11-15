@@ -136,49 +136,7 @@ class Backtester:
         # Evaluate the agents based on the actual prices
         results = self.evaluate_agents(self.benchmarks)
 
-        return results
-
-    def results_to_excel(self, filename: str, save_dir=".", disp=False):
-        """
-        Export the results of the simulation to an excel file so that they are in more human-readable format.
-        :param filename: Filename of the excel file.
-        :param save_dir: Directory in which the file will be saved relevant to the backtesting project.
-        :param disp: Bool parameter wheter to print results or not while exporting the,
-        """
-        if self.results == {}:
-            raise ValueError("Please run evaluate first to create the results.")
-
-        filepath = os.path.join(os.path.dirname(__file__), '..', save_dir, filename)
-        count = 1
-        while os.path.exists(filepath):
-            name = filename.split('.')
-            filepath = os.path.join(os.path.dirname(__file__), '..', save_dir, name[0] + f" ({count})." + name[1])
-            count += 1
-        # Open the same excel file only one time.
-        if self.excel_writer is None:
-            self.excel_writer = pd.ExcelWriter(filepath)
-        else:
-            if filepath != self.excel_writer.path:
-                self.excel_writer.save()
-                self.excel_writer = pd.ExcelWriter(filepath)
-
-        for i, (agent, agent_results) in enumerate(self.results.items()):
-
-            # Here you have access to every model's results separately.
-            if disp:
-                print(agent)
-            row = 0
-            for frequency, frequency_results in agent_results.items():
-                if frequency_results.empty:
-                    continue
-                if disp:
-                    pd.set_option("display.max_rows", None, "display.max_columns", None)
-                    print(f"For frequency {frequency} the results are:\n{frequency_results}")
-                try:
-                    frequency_results.to_excel(excel_writer=self.excel_writer, sheet_name=agent, startrow=row, float_format="%.2f")
-                    row += frequency_results.shape[0] + 1
-                except Exception as ex:
-                    raise ValueError("Failed to write to excel because: {}".format(ex))
+        return result
 
     def results_to_excel2(self, filename: str, save_dir=".", disp=False):
         """

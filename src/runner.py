@@ -7,7 +7,7 @@ from src.models.random_allocation import RandomAllocation
 from src.models.HRP_allocation import HRP
 from ticker_codes import tickers
 
-
+# make sure to pip install -r requirements.txt
 
 start_date = date(2020, 1, 1)
 end_date = date(2020, 12, 29)
