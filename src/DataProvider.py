@@ -1,7 +1,6 @@
 import yfinance as yf
 import pandas as pd
 from typing import List
-from src.ticker_codes import etf_ticker_universe
 
 class DataProvider:
     def __init__(self, tickers: List[str], start: str, end: str, target: str = "Adj Close") -> None:
@@ -11,16 +10,24 @@ class DataProvider:
         self.data = pd.DataFrame() # initialize to empty
         self.target = target
 
-        self.eft_ticker_map = etf_ticker_universe
+    def provide(self) -> pd.DataFrame:
+        """
+        Main class function which returns the ticker data requested
+        """
+        self.fetch()
+        self.clean()
+        self.calc_returns()
+        return self.data
 
+    
     def fetch(self) -> pd.DataFrame:
         """
         Fetches historical for the specified asset classes.
         """
         self.data = yf.download(self.tickers, self.start, self.end)
         self.data = self.data[self.target] if self.target else self.data
-        self.clean()
-        return self.data
+        
+        
 
     def clean(self, brute = True) -> None:
         """
@@ -42,54 +49,61 @@ class DataProvider:
             print("The dataset contains no null values")
         return True
 
-    @staticmethod
-    def load_etf_stock_data(etf_list, start_date=None, end_date=None, etf_ticker_map=etf_ticker_universe):
-        """
-        Loads adjusted close, adjusted high, adjusted low, and volume data for each stock in the selected ETFs.
 
-        Parameters:
-        - etf_list: List of ETF sector symbols (e.g., ['xlf', 'xli'])
-        - start_date: Start date for the data in 'YYYY-MM-DD' format (optional)
-        - end_date: End date for the data in 'YYYY-MM-DD' format (optional)
-        - etf_ticker map: Dict with str as key, lists as values
+    def calc_returns(self):
+        self.data = self.data.pct_change()
+        self.data = self.data.dropna()
+        
+    
 
-        Returns:
-        - etf_data_dict: Nested dictionary with ETF sectors as keys, and dictionaries with ticker names as keys and stock data as values.
-        """
-        etf_data_dict = {}
+    # @staticmethod
+    # def load_etf_stock_data(etf_list, start_date=None, end_date=None, etf_ticker_map=etf_ticker_universe):
+    #     """
+    #     Loads adjusted close, adjusted high, adjusted low, and volume data for each stock in the selected ETFs.
 
-        for etf in etf_list:
-            etf_lower = etf.lower()
-            etf_upper = etf.upper()
-            if etf_lower not in etf_ticker_map:
-                print(f"ETF '{etf_upper}' not recognized.")
-                continue
+    #     Parameters:
+    #     - etf_list: List of ETF sector symbols (e.g., ['xlf', 'xli'])
+    #     - start_date: Start date for the data in 'YYYY-MM-DD' format (optional)
+    #     - end_date: End date for the data in 'YYYY-MM-DD' format (optional)
+    #     - etf_ticker map: Dict with str as key, lists as values
 
-            tickers = etf_ticker_map[etf_lower]
-            print(f"Downloading data for ETF '{etf_upper}' with tickers: {tickers}")
+    #     Returns:
+    #     - etf_data_dict: Nested dictionary with ETF sectors as keys, and dictionaries with ticker names as keys and stock data as values.
+    #     """
+    #     etf_data_dict = {}
 
-            etf_ticker_data = {}
+    #     for etf in etf_list:
+    #         etf_lower = etf.lower()
+    #         etf_upper = etf.upper()
+    #         if etf_lower not in etf_ticker_map:
+    #             print(f"ETF '{etf_upper}' not recognized.")
+    #             continue
 
-            for ticker in tickers:
-                # Download data for the ticker individually
-                try:
-                    ticker_obj = yf.Ticker(ticker)
-                    data = ticker_obj.history(start=start_date, end=end_date, auto_adjust=True)
+    #         tickers = etf_ticker_map[etf_lower]
+    #         print(f"Downloading data for ETF '{etf_upper}' with tickers: {tickers}")
 
-                    if data.empty:
-                        print(f"No data retrieved for ticker '{ticker}' in ETF '{etf_upper}'.")
-                        continue
+    #         etf_ticker_data = {}
 
-                    selected_columns = ['High', 'Low', 'Close', 'Volume']
-                    ticker_data = data[selected_columns]
+    #         for ticker in tickers:
+    #             # Download data for the ticker individually
+    #             try:
+    #                 ticker_obj = yf.Ticker(ticker)
+    #                 data = ticker_obj.history(start=start_date, end=end_date, auto_adjust=True)
 
-                    # Store the data in the nested dictionary
-                    etf_ticker_data[ticker] = ticker_data
+    #                 if data.empty:
+    #                     print(f"No data retrieved for ticker '{ticker}' in ETF '{etf_upper}'.")
+    #                     continue
 
-                except Exception as e:
-                    print(f"Error retrieving data for ticker '{ticker}' in ETF '{etf_upper}': {e}")
-                    continue
+    #                 selected_columns = ['High', 'Low', 'Close', 'Volume']
+    #                 ticker_data = data[selected_columns]
 
-            etf_data_dict[etf_lower] = etf_ticker_data
+    #                 # Store the data in the nested dictionary
+    #                 etf_ticker_data[ticker] = ticker_data
 
-        return etf_data_dict
+    #             except Exception as e:
+    #                 print(f"Error retrieving data for ticker '{ticker}' in ETF '{etf_upper}': {e}")
+    #                 continue
+
+    #         etf_data_dict[etf_lower] = etf_ticker_data
+
+    #     return etf_data_dict
