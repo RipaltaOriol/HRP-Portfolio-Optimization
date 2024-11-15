@@ -89,7 +89,11 @@ class Backtester:
         :return: Dictionary with the specified format.
         """
         try:
+            # VERY IMPORTANT FOR INDEX MATCHING OR EVERYTHING AFTER THIS POINT ON PIPELINE IS FUCKED. basically i reindex weight_predictions and our data to have since indeces, and clean them properly
             weight_predictions = self.agents[0].weight_predictions
+            daily_returns = self.data.pct_change().fillna(0)
+            weight_predictions  = weight_predictions.resample('D').ffill().dropna(how='all')
+            weight_predictions = weight_predictions.reindex(daily_returns.index).ffill().fillna(0)
         except:
             raise ValueError(
                 "Agents haven't decided their weights for the whole period yet, please run agent.weights_allocate first!"
@@ -194,8 +198,15 @@ class Backtester:
             filepath = os.path.abspath(os.path.join(save_dir, f"{name} ({count}){ext}"))
             count += 1
 
+        if self.excel_writer is None:
+            self.excel_writer = pd.ExcelWriter(filepath)
+        else:
+            if filepath != self.excel_writer.path:
+                self.excel_writer.save()
+                self.excel_writer = pd.ExcelWriter(filepath)
+
         # Create a new Excel writer
-        with pd.ExcelWriter(filepath, engine="xlsxwriter") as writer:
+        with pd.ExcelWriter(filepath) as writer:
             for agent, agent_results in self.results.items():
                 if disp:
                     print(f"Agent: {agent}")

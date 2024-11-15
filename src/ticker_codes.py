@@ -50,9 +50,8 @@ etf_ticker_universe = {'xlb': materials_tickers, 'xlc': communication_services_t
     'xlre': real_estate_tickers}
 
 tickers = [
-    "AAPL", "MSFT", "AMZN", "GOOGL", "FB", "TSLA", "BRK.B", "NVDA", "JNJ", "JPM",
+    "AAPL", "MSFT", "AMZN", "GOOGL", "TSLA", "NVDA", "JNJ", "JPM",
     "V", "PG", "UNH", "HD", "MA", "DIS", "PYPL", "NFLX", "ADBE", "KO",
     "PFE", "NKE", "PEP", "MRK", "CSCO", "ABT", "CRM", "AVGO", "CMCSA", "T",
     "XOM", "CVX", "WMT", "INTC", "AMD", "BA", "COST", "QCOM", "TXN", "ORCL",
-    "MMM", "HON", "AMGN", "SPGI", "CAT", "GS", "MDT", "BLK", "USB", "LMT"
-]
+    "MMM", "HON", "AMGN", "SPGI", "CAT", "GS", "MDT", "BLK", "USB", "LMT"]
