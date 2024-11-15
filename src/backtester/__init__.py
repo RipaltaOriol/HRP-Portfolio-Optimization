@@ -223,7 +223,7 @@ class Backtester:
                     try:
                         # Write results to Excel
                         frequency_results.to_excel(writer, sheet_name=agent[:31],  # Excel sheet name limit is 31 characters
-                            startrow=row, float_format="%.2f", )
+                            startrow=row, float_format="%.6f", )
                         row += frequency_results.shape[0] + 2  # Leave a gap between sections
                     except Exception as ex:
                         raise ValueError(f"Failed to write to Excel: {ex}")
