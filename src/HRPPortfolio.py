@@ -6,51 +6,42 @@ from sklearn.metrics.pairwise import euclidean_distances
 from scipy.cluster.hierarchy import dendrogram, linkage
 from src import RelationalStatistics
 from src.RelationalStatistics import RelationalStatistics
-
-
-
-"""
-This file contains the HRPPortfolio class. This class will have the following attributes:
-1. 
-"""
+from typing import List
 
 class HRPPortfolio:
-
+    """
+    Portfolio optimization using Hierarchical Risk Parity (HRP)
+    """
     def __init__(self, data):
+        """
+        pd.DataFrame data: data of ticker returns
+        class RelationalStatistics: module for relational statistics
+        """
         self.data = data
         self.stats_module = RelationalStatistics(data)
 
-    def hierarchical_clustering(self):
+    def hierarchical_clustering(self) -> np.ndarray:
         """
-        Parameters
-        ----------
-        self
-
-        Returns
-        -------
-        Correlation-Distance matrix
+        Performs hierarchical clustering on the euclidean distance matrix.
         """
-        eucledian_df = self.stats_module.fetch_eucledian_distance()
-
-        # Calculate the eucledian distance between the stocks - will be using centroid linkage method
+        eucledian_df = self.stats_module.calc_eucledian_distance()
+        # calculate the eucledian distance between the ticker
         linkage_matrix = linkage(eucledian_df, 'centroid')
-
         return linkage_matrix
-    
-    def get_cluster_order(self):
-        '''Takes the linkage matrix and returns the cluster order'''
 
-
+    def get_cluster_order(self) -> List[str]:
+        """
+        Gets the cluster order from the hierarchical clustering.
+        """
+        n = self.data.shape[1]  # total number of assets
         linkage_matrix = self.hierarchical_clustering()
-        n = self.data.shape[1]  # Total number of original assets based on columns in self.data
-        merged_assets = []  # List to track original assets that are merged
-        merged_set = set()  # Set to track already merged assets
+        merged_assets = []  # assets
+        merged_set = set()  # cache for assets
 
-        # Step through each merge (each row of the linkage matrix)
-        for i in range(len(linkage_matrix)):
+        for i in range(len(linkage_matrix)): # iterate through the linkage matrix
             left, right = int(linkage_matrix[i, 0]), int(linkage_matrix[i, 1])
 
-            # Only add the original assets to the merged list if they haven't already been merged
+            # add one ticker to the merged list if not merged already
             if left < n and left not in merged_set:
                 merged_assets.append(left)
                 merged_set.add(left)
@@ -60,37 +51,37 @@ class HRPPortfolio:
                 merged_set.add(right)
 
         return merged_assets
-        
 
-    def quasi_diagonalization(self):
-        '''Takes the linkage matrix and cluster order and orders the matrix so that 
-        the highest correlations are along the diagonal'''
+
+    def quasi_diagonalization(self) -> pd.DataFrame:
+        """
+        Use the linkage matrix and cluster order to quasi-diagonalize the covariance matrix.
+        Such that the highest correlations are along the diagonal.
+        """
         cluster_order = self.get_cluster_order()
 
-        # Step 2: Ensure cluster_order is a 1D array or list (flatten if necessary)
+        # ensure cluster_order is a 1D array, otherwise flatten
         cluster_order = np.ravel(cluster_order)
-    
-        # Step 3: Fetch the covariance matrix
-        matrix = self.stats_module.fetch_covariance_matrix()
-    
-        # Step 4: Check if the covariance matrix is a pandas DataFrame
-        if isinstance(matrix, pd.DataFrame):
-            # Use .iloc to index the DataFrame
-            reordered_matrix = matrix.iloc[cluster_order, cluster_order].values
-        else:
-            # If it's a numpy array, use np.ix_ for indexing
-            reordered_matrix = matrix[np.ix_(cluster_order, cluster_order)]
-    
-        return reordered_matrix
-    
-    def hrp_recursive_bisection(self, reordered_matrix, cluster_order, linkage_matrix, merged_clusters):
-        '''This function performs the recursive bisection method on the given ordered matrix and outputs the weights'''
-        n = len(cluster_order)
+        cov_matrix = self.stats_module.calc_covariance_matrix()
 
+        if isinstance(cov_matrix, pd.DataFrame): # ensure cov matrix is a pd.DataFrame
+            reordered_matrix = cov_matrix.iloc[cluster_order, cluster_order].values
+        else : # else access values using np.ix
+            reordered_matrix = cov_matrix[np.ix_(cluster_order, cluster_order)]
+
+        return reordered_matrix
+
+    # ---- PROBLEMATIC ----
+    def hrp_recursive_bisection(self, reordered_matrix, cluster_order, linkage_matrix, merged_clusters):
+        """
+        Perform recursive bisection on the given ordered matrix and outputs the weights
+        """
+
+        n = len(cluster_order)
         if n == 1:
             return {cluster_order[0]: 1}
 
-        # Get the node from the linkage matrix (this is the current bisection step)
+        # get the node from the linkage matrix (this is the current bisection step)
         node = linkage_matrix[n - 2]  # n-2 because linkage matrix has n-1 merges
 
         left_child = int(node[0])
@@ -134,7 +125,7 @@ class HRPPortfolio:
             weights_left[asset] *= alpha_left
         for asset in weights_right:
             weights_right[asset] *= alpha_right
-    
+
         # Combine left and right weights into a single dictionary
         weights = {**weights_left, **weights_right}
 
@@ -142,24 +133,3 @@ class HRPPortfolio:
         merged_clusters[len(cluster_order)] = left_cluster + right_cluster  # Store the merged cluster assets
 
         return weights
-
-
-
-# """
-# Parameters
-# ----------
-# input1 : dtype 
-#     what is it?
-# input2 : dtype 
-#     what is it?
-# input3 : dtype 
-#     what is it?
-
-# Returns
-# -------
-# What does the function return.
-# """
-    
-
-    
-        
