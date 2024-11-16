@@ -9,6 +9,18 @@ class RelationalStatistics:
         """
         self.data = data
 
+    def fetch_standard_deviations(self) -> pd.DataFrame:
+        """
+            fetches standard deviations
+        """
+        return self.data.std()
+    
+    def fetch_variances(self) -> pd.DataFrame:
+        """
+            fetches variances
+        """
+        return self.data.var()
+    
     def fetch_covariance_matrix(self)-> pd.DataFrame:
         """
             Fetches covariance matrix
@@ -60,14 +72,49 @@ class RelationalStatistics:
 
         return euclidean_distance_matrix
     
-    def fetch_shrinkage_covariance(self, shrinkage=0.1) -> pd.DataFrame:
+    def fetch_shrinkage_coefficient(self) -> float:
         """
-        Fetches shrinkage covariance matrix using Ledoit-Wolf shrinkage method.
+            calculate shrinkage coefficient by heiristic: lamda = num of variables/ num of observations
+        """
+        return self.data.shape[1] / self.data.shape[0]
+    
+
+
+############################################ PROBLEMATIC ######################################
+    def fetch_average_correlation(self):
+        """
+            calculate average correlation
+        """
+        # Exclude diagonal elements
+        corr_matrix = self.fetch_correlation_matrix()
+        n = corr_matrix.shape[0]
+        off_diagonal_sum = np.sum(corr_matrix) - np.sum(np.diag(corr_matrix))
         
-        :param shrinkage: Shrinkage coefficient (default: 0.1)
-        :return: Shrinkage covariance matrix as a DataFrame
+        # Compute the average correlation
+        num_off_diagonal = n * (n - 1)  # Total number of off-diagonal elements
+        avg_corr = off_diagonal_sum / num_off_diagonal
+        # return off_diagonal_sum, num_off_diagonal
+        return avg_corr
+    
+    def fetch_shrinkage_covariance(self) -> pd.DataFrame:
         """
-        sample_cov = self.data.cov().values  # Sample covariance matrix
+        Fetches shrinkage covariance matrix using method above
+        Fetches shrinkage coefficient from method above
+        Constructs constant correlation matrix
+
+        Returns shrinkage covariance matrix
+        """
+        # get shrinkage coefficient from method
+        shrinkage_coefficient = self.fetch_shrinkage_coefficient()
+
+        # get sample covariance matrix
+        sample_cov = self.fetch_covariance_matrix()
+
+        # set the diagonal of our constant correlation matrix to be equal to the diagonal of our covariance matrix
+
+
         identity = np.eye(sample_cov.shape[0])  # Identity matrix of same size
-        shrinkage_cov = (1 - shrinkage) * sample_cov + shrinkage * identity
+        shrinkage_cov = (1 - shrinkage_coefficient) * sample_cov + shrinkage_coefficient * identity
         return pd.DataFrame(shrinkage_cov, index=self.data.columns, columns=self.data.columns)
+    
+
