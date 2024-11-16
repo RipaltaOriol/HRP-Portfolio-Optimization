@@ -17,8 +17,6 @@ class HRP(WeightAllocationModel):
     def calculate_hrp_weights(self, returns):
         port = rp.HCPortfolio(returns=returns)
 
-        # Estimate optimal portfolio:
-
         model = 'HRP'  # Could be HRP or HERC
         codependence = 'pearson'  # Correlation matrix used to group assets in clusters
         rm = 'MV'  # Risk measure used, this time will be variance
@@ -36,7 +34,7 @@ class HRP(WeightAllocationModel):
 
         # Iterate over each rebalance date within the specified date range
         for rebalance_date in pd.date_range(start=date_from, end=date_to, freq='MS'):
-            # Define the past period for calculating returns
+            # Define the past subperiod for calculating returns
             start_date = rebalance_date - pd.DateOffset(months=self.months_back)
             end_date = rebalance_date - pd.DateOffset(days=1)
 
@@ -55,7 +53,6 @@ class HRP(WeightAllocationModel):
             hrp_weights = self.calculate_hrp_weights(returns)
             hrp_weights = np.array(hrp_weights).reshape(1, len(ticker_list))
 
-            # Create the DataFrame
             weights_df = pd.DataFrame(data=hrp_weights, index=[rebalance_date], columns=ticker_list)
 
             weights_list.append(weights_df)

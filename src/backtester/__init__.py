@@ -136,7 +136,7 @@ class Backtester:
         # Evaluate the agents based on the actual prices
         results = self.evaluate_agents(self.benchmarks)
 
-        return result
+        return results
 
     def results_to_excel2(self, filename: str, save_dir=".", disp=False):
         """
