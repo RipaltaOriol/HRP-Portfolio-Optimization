@@ -36,7 +36,7 @@ class HRPPortfolio:
 
         return linkage_matrix
     
-    def get_cluster_order(linkage_matrix):
+    def get_cluster_order(self, linkage_matrix):
         '''Takes the linkage matrix and returns the cluster order'''
 
         n = len(linkage_matrix) + 1  
