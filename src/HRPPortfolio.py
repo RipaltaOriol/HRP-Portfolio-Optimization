@@ -7,6 +7,9 @@ from scipy.cluster.hierarchy import dendrogram, linkage
 from src import RelationalStatistics
 from src.RelationalStatistics import RelationalStatistics
 from typing import List
+import matplotlib as plt
+import seaborn as sns
+
 
 class HRPPortfolio:
     """
@@ -73,53 +76,51 @@ class HRPPortfolio:
             reordered_matrix = cov_matrix[np.ix_(cluster_order, cluster_order)]
 
         return reordered_matrix
-
+    
     # ---- PROBLEMATIC ----
-    def hrp_recursive_bisection(self, reordered_matrix, cluster_order, linkage_matrix, merged_clusters):
+    def hrp_recursive_bisection(self, reordered_matrix, cluster_order, linkage_matrix, merged_clusters = None):
         """
         Perform recursive bisection on the given ordered matrix and outputs the weights
         """
 
+        # Initialize merged_clusters dictionary if not provided
+        if merged_clusters is None:
+            merged_clusters = {}
+
         n = len(cluster_order)
+
+        # Base case: Single asset
         if n == 1:
             return {cluster_order[0]: 1}
 
-        # get the node from the linkage matrix (this is the current bisection step)
-        node = linkage_matrix[n - 2]  # n-2 because linkage matrix has n-1 merges
+        # Current node from the linkage matrix
+        node = linkage_matrix[len(linkage_matrix) - n]  # Get corresponding node
+    
+        left_child, right_child = int(node[0]), int(node[1])
 
-        left_child = int(node[0])
-        right_child = int(node[1])
-
-        # If the indices are less than the number of original assets, they refer directly to assets
+        # Get clusters (base assets or merged clusters)
         if left_child < len(cluster_order):
             left_cluster = [cluster_order[left_child]]
         else:
-            # Recursively get the cluster members for the merged cluster
             left_cluster = merged_clusters[left_child]
 
         if right_child < len(cluster_order):
             right_cluster = [cluster_order[right_child]]
         else:
-            # Recursively get the cluster members for the merged cluster
             right_cluster = merged_clusters[right_child]
 
-        # Covariance matrices for the left and right clusters
+        # Calculate covariances
         cov_left = reordered_matrix[np.ix_(left_cluster, left_cluster)]
         cov_right = reordered_matrix[np.ix_(right_cluster, right_cluster)]
 
-        # Inverse covariance matrices for left and right
-        inv_cov_left = np.linalg.inv(cov_left)
-        inv_cov_right = np.linalg.inv(cov_right)
+        # Inverse-variance allocation
+        var_left = np.trace(np.linalg.inv(cov_left))
+        var_right = np.trace(np.linalg.inv(cov_right))
 
-        # Variance of the left and right clusters
-        var_left = np.trace(inv_cov_left)
-        var_right = np.trace(inv_cov_right)
-
-        # The alpha values for allocation
         alpha_left = 1 - (var_right / (var_left + var_right))
         alpha_right = 1 - alpha_left
 
-        # Recursive call to the left and right children (subclusters)
+        # Recursive bisection
         weights_left = self.hrp_recursive_bisection(reordered_matrix, left_cluster, linkage_matrix, merged_clusters)
         weights_right = self.hrp_recursive_bisection(reordered_matrix, right_cluster, linkage_matrix, merged_clusters)
 
@@ -129,10 +130,14 @@ class HRPPortfolio:
         for asset in weights_right:
             weights_right[asset] *= alpha_right
 
-        # Combine left and right weights into a single dictionary
+        # Merge clusters and update merged_clusters dictionary
+        merged_clusters[n + len(linkage_matrix)] = left_cluster + right_cluster
         weights = {**weights_left, **weights_right}
 
-        # Update the merged clusters dictionary with the current merge
-        merged_clusters[len(cluster_order)] = left_cluster + right_cluster  # Store the merged cluster assets
-
         return weights
+        
+    def plot_dendrogram(self):
+        """ Plot the dendrogram based on hierarchical clustering. """
+        linkage_matrix = self.hierarchical_clustering()
+        return linkage_matrix
+
