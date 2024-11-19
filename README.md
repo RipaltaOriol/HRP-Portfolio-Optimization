@@ -8,6 +8,10 @@ Members:
 - Evi Paraskevi Prousanidi
 - Fransesco Leopaldi XVII
 
+## SETUP
+
+*pip install -r requirements.txt*
+
 ## Backtesting Infrastructure 
 
 1) A backtesting infrastructure for comparing and evaluating different porfolio optimization strategies against benchmarks.
@@ -17,10 +21,6 @@ Members:
 * You can add benchmarks in the runner.py as follows: benchmarks = [b.PNL('P'),b.Sharpe('P')] denoting, the metric and its frequency.
 * You can add Agents, that inherit a model, and backtest them with the Backtester Class.
 * See and run runner.py
-
-## SETUP
-
-*pip install -r requirements.txt*
 
 ## Motivation
 
