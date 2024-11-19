@@ -35,21 +35,21 @@ class RelationalStatistics:
         """
         return self.data.corr()
 
-    def calc_distance(self) -> pd.DataFrame:
+    def calc_correlation_distance(self) -> pd.DataFrame:
         """
         Generates correlation distance matrix for the class data
         """
-        # calculate the distance matrix
-        distance_matrix = (0.5*(1- self.calc_correlation_matrix()))**0.5
-        return distance_matrix
+        corr_distance_matrix = (0.5 * (1 - self.calc_correlation_matrix())) ** 0.5
+        return corr_distance_matrix
 
     def calc_eucledian_distance(self) -> pd.DataFrame:
         """
         Generates eucledian distance matrix for the class data
         """
-        distance_matrix = self.calc_distance()
+        distance_matrix = self.calc_correlation_distance()
         euclidean_distance_matrix = euclidean_distances(distance_matrix.values)
-        euclidean_distance_matrix = pd.DataFrame(euclidean_distance_matrix, index=distance_matrix.columns, columns=distance_matrix.columns)
+        matrix_columns = distance_matrix.columns
+        euclidean_distance_matrix = pd.DataFrame(euclidean_distance_matrix, index=matrix_columns, columns=matrix_columns)
         return euclidean_distance_matrix
 
     def calc_shrinkage_coefficient(self) -> float:
@@ -83,6 +83,6 @@ class RelationalStatistics:
         sample_cov = self.calc_covariance_matrix()
 
         # set the diagonal of our constant correlation matrix to be equal to the diagonal of our covariance matrix
-        identity = np.eye(sample_cov.shape[0])  # Identity matrix of same size
+        identity = np.eye(sample_cov.shape[0])  # identity matrix of same size
         shrinkage_cov = (1 - shrinkage_coefficient) * sample_cov + shrinkage_coefficient * identity
         return pd.DataFrame(shrinkage_cov, index=self.data.columns, columns=self.data.columns)
