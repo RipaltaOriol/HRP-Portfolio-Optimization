@@ -89,7 +89,6 @@ class RelationalStatistics:
         variances = np.diag(sample_cov_matrix.values)
 
         target_cov_matrix = sample_cov_matrix.copy()
-        target_cov_matrix.loc[:, :] = 0
 
         for i in range(sample_cov_matrix.shape[0]):
             for j in range(sample_cov_matrix.shape[1]):
@@ -98,9 +97,7 @@ class RelationalStatistics:
                     target_cov_matrix.iloc[i, j] = variances[i]
                 else:
                     # Use the fixed correlation for off-diagonal elements
-                    target_cov_matrix.iloc[i, j] = (
-                    fixed_correlation * np.sqrt(variances[i] * variances[j])
-                )
+                    target_cov_matrix.iloc[i, j] = (fixed_correlation * np.sqrt(variances[i] * variances[j]))
 
         return target_cov_matrix
 
