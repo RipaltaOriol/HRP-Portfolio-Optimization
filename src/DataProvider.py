@@ -1,5 +1,5 @@
-import pandas as pd
 import yfinance as yf
+import pandas as pd
 from typing import List
 import datetime
 from .ticker_codes import etf_ticker_universe
@@ -13,7 +13,7 @@ class DataProvider:
         self.tickers = tickers
         self.start = start
         self.end = end
-        self.data = pd.DataFrame()  # Initialize to empty
+        self.data = pd.DataFrame()  # initialize to empty
         self.target = target
 
     def fetch(self) -> pd.DataFrame:
