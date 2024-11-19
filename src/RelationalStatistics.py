@@ -59,30 +59,59 @@ class RelationalStatistics:
         """
         return self.data.shape[1] / self.data.shape[0]
 
-    # ---- PROBLEMATIC ----
     def calc_average_correlation(self) -> float:
         """
         Generate average correlation amongst variables in the class data
         """
-        n = corr_matrix.shape[0]
-        corr_matrix = self.calc_correlation_matrix() # exclude diagonal elements
+        correlation = self.calc_correlation_matrix()
+        # all diagonal 0
+        np.fill_diagonal(correlation.values, 0)
 
-        off_diagonal_sum = np.sum(corr_matrix) - np.sum(np.diag(corr_matrix))
+        # Sum up all elements
+        sum_of_off_diagonal = correlation.values.sum()
 
-        # compute the average correlation
-        num_off_diagonal = n * (n - 1)  # total number of off-diagonal elements
-        avg_corr = off_diagonal_sum / num_off_diagonal
-        # return off_diagonal_sum, num_off_diagonal
+        # calculate the size of the number of values (subtracting the num of rows because we ignore diagonals)
+        size = correlation.shape[0] * correlation.shape[1]- correlation.shape[0]
+
+        avg_corr = sum_of_off_diagonal/size
+
         return avg_corr
+    
+    def calc_target_covariance_matrix(self) -> pd.DataFrame :
+        """
+        Generated the target covariance matrix used in the shrinkage function
+        Target = fixed correlation matrix
+        """
+        sample_cov_matrix = self.calc_covariance_matrix()
+        fixed_correlation = self.calc_average_correlation()
+
+        # Extract the variances (diagonal elements)
+        variances = np.diag(sample_cov_matrix.values)
+
+        target_cov_matrix = sample_cov_matrix.copy()
+        target_cov_matrix.loc[:, :] = 0
+
+        for i in range(sample_cov_matrix.shape[0]):
+            for j in range(sample_cov_matrix.shape[1]):
+                if i == j:
+                    # Keep the variances as is (diagonal elements)
+                    target_cov_matrix.iloc[i, j] = variances[i]
+                else:
+                    # Use the fixed correlation for off-diagonal elements
+                    target_cov_matrix.iloc[i, j] = (
+                    fixed_correlation * np.sqrt(variances[i] * variances[j])
+                )
+
+        return target_cov_matrix
 
     def calc_shrinkage_covariance(self) -> pd.DataFrame:
         """
         Generates the shrinkage covariance method
         """
         shrinkage_coefficient = self.calc_shrinkage_coefficient()
-        sample_cov = self.calc_covariance_matrix()
+        sample_cov_matrix = self.calc_covariance_matrix()
+        target_cov_matrix = self.calc_target_covariance_matrix()
 
-        # set the diagonal of our constant correlation matrix to be equal to the diagonal of our covariance matrix
-        identity = np.eye(sample_cov.shape[0])  # Identity matrix of same size
-        shrinkage_cov = (1 - shrinkage_coefficient) * sample_cov + shrinkage_coefficient * identity
-        return pd.DataFrame(shrinkage_cov, index=self.data.columns, columns=self.data.columns)
+        #calculate shrunk covariance matrix
+        shrunk_covariance_matrix = (1 - shrinkage_coefficient) * sample_cov_matrix + shrinkage_coefficient * target_cov_matrix
+        return shrunk_covariance_matrix
