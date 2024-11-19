@@ -4,11 +4,13 @@ import pandas as pd
 import scipy.cluster.hierarchy as sch
 from sklearn.metrics.pairwise import euclidean_distances
 from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
 from src import RelationalStatistics
 from src.RelationalStatistics import RelationalStatistics
 from typing import List
 import matplotlib as plt
 import seaborn as sns
+
 
 
 class HRPPortfolio:
@@ -28,12 +30,8 @@ class HRPPortfolio:
         Performs hierarchical clustering on the euclidean distance matrix.
         """
         eucledian_df = self.stats_module.calc_eucledian_distance()
-        # calculate the eucledian distance between the ticker
-        linkage_matrix = linkage(eucledian_df, 'centroid')
+        linkage_matrix = linkage(eucledian_df, 'single')
         return linkage_matrix
-    
-    def get_cluster_order(self, linkage_matrix):
-        '''Takes the linkage matrix and returns the cluster order'''
 
     def get_cluster_order(self) -> List[str]:
         """
@@ -76,7 +74,7 @@ class HRPPortfolio:
             reordered_matrix = cov_matrix[np.ix_(cluster_order, cluster_order)]
 
         return reordered_matrix
-    
+
     # ---- PROBLEMATIC ----
     def hrp_recursive_bisection(self, reordered_matrix, cluster_order, linkage_matrix, merged_clusters = None):
         """
@@ -95,7 +93,7 @@ class HRPPortfolio:
 
         # Current node from the linkage matrix
         node = linkage_matrix[len(linkage_matrix) - n]  # Get corresponding node
-    
+
         left_child, right_child = int(node[0]), int(node[1])
 
         # Get clusters (base assets or merged clusters)
@@ -135,9 +133,8 @@ class HRPPortfolio:
         weights = {**weights_left, **weights_right}
 
         return weights
-        
+
     def plot_dendrogram(self):
         """ Plot the dendrogram based on hierarchical clustering. """
         linkage_matrix = self.hierarchical_clustering()
         return linkage_matrix
-
