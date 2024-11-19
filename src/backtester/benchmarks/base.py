@@ -38,16 +38,20 @@ class Benchmark:
         elif freq == 'P':
             return dataframe
 
+    # should be added for non linear metrics
     @staticmethod
     def to_frame_and_indexing(data, freq, name):
+        if isinstance(data, pd.DataFrame):
+            return data
+
         if freq == 'P':
             if isinstance(data, pd.Series):
-                dataframe = data
-                dataframe.index = ['period']
+                data.index = ['period']
+                return data
             else:
-                dataframe = pd.Series([data], index=['period'], name=name)
-        else:
-            dataframe = data.to_frame(name=name)
-        return dataframe
+                return pd.DataFrame({name: [data]}, index=['period'])
+        return data
+
+
 
 
