@@ -15,6 +15,12 @@ class Agent:
 
         self.weight_predictions = self.model.weights_allocate(from_date, to_date, ticker_list, data)
 
+        # adjusting weight_prediction frequency and indexing to our data.
+        returns = data.pct_change().fillna(0)
+        self.weight_predictions = self.weight_predictions.resample('D').ffill().dropna(how='all')
+        self.weight_predictions = self.weight_predictions.reindex(returns.index).ffill().fillna(0)
+        self.weight_predictions = self.weight_predictions[(self.weight_predictions.index.date>=from_date) & (self.weight_predictions.index.date<=to_date)]
+
     def date_data_needed(self, date_from, date_to=None):
         return self.model.date_data_needed(date_from, date_to)
 
@@ -22,7 +28,7 @@ class Agent:
         return "Agent with weights allocation model: {}".format(str(self.model))
 
     def __hash__(self):
-        return f"{str(self.model)} {str(self.strategy)}".__hash__()
+        return f"{str(self.model)}".__hash__()
 
     def sheet_name(self):
         return f"{str(self.model)}"

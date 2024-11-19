@@ -32,13 +32,13 @@ class HRP(WeightAllocationModel):
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         weights_list = []
 
-        # Iterate over each rebalance date within the specified date range
+        # Iterate over each rebalance date within the specified date range - updation frequency 'MS'
         for rebalance_date in pd.date_range(start=date_from, end=date_to, freq='MS'):
-            # Define the past subperiod for calculating returns
+
+            # define the past subperiod for calculating returns each time
             start_date = rebalance_date - pd.DateOffset(months=self.months_back)
             end_date = rebalance_date - pd.DateOffset(days=1)
 
-            # Slice the data for the specified past period
             past_data = data.loc[start_date:end_date, ticker_list]
 
             # Ensure there's enough data
