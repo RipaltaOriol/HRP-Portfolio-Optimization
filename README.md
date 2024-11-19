@@ -4,6 +4,9 @@ Members:
 
 - Santiago Diaz Tolivia
 - Oriol Ripalta I Maso
+- Lefteris Nazos
+- Evi Paraskevi Prousanidi
+- Fransesco Leopaldi XVII
 
 ## Motivation
 
