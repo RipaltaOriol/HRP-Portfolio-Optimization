@@ -26,7 +26,6 @@ back_tester = Backtester(start_date=start_date,
 for agent in agents:
     back_tester.add_agent(agent)
 
-# Expected to run for about 5 minutes for all models.
 back_tester.run_n_evaluate()
 
 # Export the results to an excel file. Display parameter is for printing results to console as well.
