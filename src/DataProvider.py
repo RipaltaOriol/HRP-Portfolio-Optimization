@@ -13,7 +13,7 @@ class DataProvider:
         self.tickers = tickers
         self.start = start
         self.end = end
-        self.data = pd.DataFrame() # initialize to empty
+        self.data = pd.DataFrame()  # initialize to empty
         self.target = target
 
     def provide(self) -> pd.DataFrame:
