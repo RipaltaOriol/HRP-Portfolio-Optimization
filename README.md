@@ -4,23 +4,8 @@ Members:
 
 - Santiago Diaz Tolivia
 - Oriol Ripalta I Maso
-- Lefteris Nazos
-- Evi Paraskevi Prousanidi
-- Fransesco Leopaldi XVII
-
-## SETUP
-
-*pip install -r requirements.txt*
-
-## Backtesting Infrastructure 
-
-1) A backtesting infrastructure for comparing and evaluating different porfolio optimization strategies against benchmarks.
-1) Backcasting requires -> agents that will participate in the simulation. In order for agents to participate in the simulation they need a prediction(Weight-Allocation) model, which is responsible for predicting the necessary values/weights.
-2) The current implementation doesn't save the weights after the simulation is over. It outputs the simulation results against the benchmarks we want to show.
-
-* You can add benchmarks in the runner.py as follows: benchmarks = [b.PNL('P'),b.Sharpe('P')] denoting, the metric and its frequency.
-* You can add Agents, that inherit a model, and backtest them with the Backtester Class.
-* See and run runner.py
+- Evi Prousanidou
+- Francesco Leopardi
 
 ## Motivation
 
@@ -41,5 +26,19 @@ The HRP portfolio optimization model can be divided into three parts:
 3. `Recursive Bisection` where weights are assigned to each asset in our portfolio
 
 ![HRP Dendogram](https://hudsonthames.org/wp-content/uploads/2020/06/dendrogram.png "HRP Dendogram")
+
+## SETUP
+
+*pip install -r requirements.txt*
+
+## Backtesting Infrastructure 
+
+1) A backtesting infrastructure for comparing and evaluating different porfolio optimization strategies against benchmarks.
+1) Backcasting requires -> agents that will participate in the simulation. In order for agents to participate in the simulation they need a prediction(Weight-Allocation) model, which is responsible for predicting the necessary values/weights.
+2) The current implementation doesn't save the weights after the simulation is over. It outputs the simulation results against the benchmarks we want to show.
+
+* You can add benchmarks in the runner.py as follows: benchmarks = [b.PNL('P'),b.Sharpe('P')] denoting, the metric and its frequency.
+* You can add Agents, that inherit a model, and backtest them with the Backtester Class.
+* See and run runner.py
 
 <span style="color:red">Explain different methodologies for clustering!</span>
