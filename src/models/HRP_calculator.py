@@ -1,14 +1,9 @@
 # Necessary Dependancies
 import numpy as np
 import pandas as pd
-import scipy.cluster.hierarchy as sch
-from sklearn.metrics.pairwise import euclidean_distances
 from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
 from .RelationalStatistics import RelationalStatistics
 from typing import List
-import matplotlib as plt
-import seaborn as sns
 
 
 class HRP_Calculator:

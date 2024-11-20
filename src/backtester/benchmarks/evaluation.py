@@ -48,9 +48,9 @@ class Sharpe(Benchmark):
         sharpe_ratio = mean / std
 
         sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio, self.freq, self.name)
-        #sharpe_ratio_df = sharpe_ratio_df.replace([float('inf'), float('-inf')], 0).fillna(0)# Use the class name here
+        #sharpe_ratio_df = sharpe_ratio_df.replace([float('inf'), float('-inf')], 0).fillna(0)
 
-        return sharpe_ratio_df
+        return sharpe_ratio
 
 
 class MaxDrawdown(Benchmark):

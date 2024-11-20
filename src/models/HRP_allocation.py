@@ -1,18 +1,5 @@
-import numpy as np
-import pandas as pd
 from .base import WeightAllocationModel
-import riskfolio as rp
-#from .RelationalStatistics import RelationalStatistics
-# Necessary Dependancies
-import numpy as np
 import pandas as pd
-import scipy.cluster.hierarchy as sch
-from sklearn.metrics.pairwise import euclidean_distances
-from scipy.cluster.hierarchy import dendrogram, linkage
-from scipy.spatial.distance import squareform
-from typing import List
-import matplotlib as plt
-import seaborn as sns
 from .HRP_calculator import HRP_Calculator
 
 
@@ -38,7 +25,6 @@ class HRP(WeightAllocationModel):
 
             past_data = data.loc[start_date:end_date, ticker_list]
 
-            # Ensure there's enough data
             if past_data.empty or len(past_data) < 2:
                 # Skip this rebalance date if data is insufficient
                 continue
