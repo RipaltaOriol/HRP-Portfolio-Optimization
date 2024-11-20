@@ -2,6 +2,18 @@ import numpy as np
 import pandas as pd
 from .base import WeightAllocationModel
 import riskfolio as rp
+#from .RelationalStatistics import RelationalStatistics
+# Necessary Dependancies
+import numpy as np
+import pandas as pd
+import scipy.cluster.hierarchy as sch
+from sklearn.metrics.pairwise import euclidean_distances
+from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
+from typing import List
+import matplotlib as plt
+import seaborn as sns
+from .HRP_calculator import HRP_Calculator
 
 
 # TODO: understand this functions and clean them up
@@ -13,21 +25,6 @@ class HRP(WeightAllocationModel):
     def date_data_needed(self, date_from, date_to):
         # Determine the historical data needed based on months_back parameter
         return date_from - pd.DateOffset(months=self.months_back)
-
-    def calculate_hrp_weights(self, returns):
-        port = rp.HCPortfolio(returns=returns)
-
-        model = 'HRP'  # Could be HRP or HERC
-        codependence = 'pearson'  # Correlation matrix used to group assets in clusters
-        rm = 'MV'  # Risk measure used, this time will be variance
-        rf = 0  # Risk free rate
-        linkage = 'single'  # Linkage method used to build clusters
-        max_k = 10  # Max number of clusters used in two difference gap statistic, only for HERC model
-        leaf_order = True  # Consider optimal order of leafs in dendrogram
-
-        weights = port.optimization(model=model, codependence=codependence, rm=rm, rf=rf, linkage=linkage, max_k=max_k, leaf_order=leaf_order)
-
-        return weights
 
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         weights_list = []
@@ -46,20 +43,21 @@ class HRP(WeightAllocationModel):
                 # Skip this rebalance date if data is insufficient
                 continue
 
-            # Calculate returns for the historical period
-            returns = past_data.pct_change().dropna()
+            hrp_calculator = HRP_Calculator(past_data)
+            hrp_weights = hrp_calculator.weights_allocate()
 
-            # Calculate HRP weights
-            hrp_weights = self.calculate_hrp_weights(returns)
-            hrp_weights = np.array(hrp_weights).reshape(1, len(ticker_list))
-
-            weights_df = pd.DataFrame(data=hrp_weights, index=[rebalance_date], columns=ticker_list)
-
+            weights_df = pd.DataFrame(data=[hrp_weights.values()], index=[rebalance_date], columns=hrp_weights.keys())
+            weights_df =  weights_df[data.columns]
             weights_list.append(weights_df)
 
         # Concatenate all weights and sort by index (date)
         weight_predictions = pd.concat(weights_list)
         weight_predictions = weight_predictions.sort_index()
-        weight_predictions.columns = ticker_list
+        #weight_predictions.columns = ticker_list
 
         return weight_predictions
+
+
+
+
+

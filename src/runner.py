@@ -3,7 +3,6 @@ from src.agents import Agent
 from src.backtester import Backtester
 from datetime import date
 import src.backtester.benchmarks.evaluation as b
-from src.models.random_allocation import RandomAllocation
 from src.models.HRP_allocation import HRP
 from ticker_codes import tickers
 
