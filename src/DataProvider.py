@@ -1,20 +1,19 @@
 import yfinance as yf
 import pandas as pd
 from typing import List
+import datetime
 
 class DataProvider:
-    def __init__(self, tickers: List[str], start: str, end: str, target: str = "Adj Close") -> None:
+    def __init__(self, start: datetime.date, end: datetime.date, tickers: List[str], target: str = "Adj Close") -> None:
         """
-        List[str]: tickers
-        str: start date for data
-        str: end date for data
-        str: target column to use for returns
+        Initialize the DataProvider with start and end dates as datetime.date objects, and a list of tickers.
         """
         self.tickers = tickers
         self.start = start
         self.end = end
-        self.data = pd.DataFrame()  # initialize to empty
+        self.data = pd.DataFrame()  # Initialize to empty
         self.target = target
+
 
     def provide(self) -> pd.DataFrame:
         """
@@ -27,19 +26,16 @@ class DataProvider:
         self.calc_returns()
         return self.data
 
-
     def fetch(self) -> pd.DataFrame:
-        """
-        Fetches historical for the specified asset classes.
-        ----
-        Returns pd.DataFrame with ticker data.
-        """
-        self.data = yf.download(self.tickers, self.start, self.end)
+        start_str = self.start.strftime('%Y-%m-%d')
+        end_str = self.end.strftime('%Y-%m-%d')
+        self.data = yf.download(self.tickers, start=start_str, end=end_str)
         self.data = self.data[self.target] if self.target else self.data
+        self.data.index = self.data.index.tz_localize(None)
 
+        return self.data
 
-
-    def clean(self, brute = True) -> None:
+    def clean(self, brute=True) -> None:
         """
         Clean up the data
         """
@@ -48,7 +44,7 @@ class DataProvider:
             print("Pefroming cleaning")
             if brute:
                 self.data = self.data.dropna()
-            else: # TODO: the code below has not been tested
+            else:  # TODO: the code below has not been tested
                 missing_fractions = self.data.isnull().mean().sort_values(ascending=False)
                 missing_fractions.head(10)
                 drop_list = sorted(list(missing_fractions[missing_fractions > 0.3].index))
@@ -58,7 +54,6 @@ class DataProvider:
         else:
             print("The dataset contains no null values")
         return True
-
 
     def calc_returns(self):
         """
