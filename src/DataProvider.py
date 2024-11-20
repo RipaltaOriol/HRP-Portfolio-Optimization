@@ -1,14 +1,14 @@
 import yfinance as yf
 import pandas as pd
 from typing import List
-import datetime
-from .ticker_codes import etf_ticker_universe
-
 
 class DataProvider:
-    def __init__(self, start: datetime.date, end: datetime.date, tickers: List[str], target: str = "Adj Close") -> None:
+    def __init__(self, tickers: List[str], start: str, end: str, target: str = "Adj Close") -> None:
         """
-        Initialize the DataProvider with start and end dates as datetime.date objects, and a list of tickers.
+        List[str]: tickers
+        str: start date for data
+        str: end date for data
+        str: target column to use for returns
         """
         self.tickers = tickers
         self.start = start
@@ -16,14 +16,28 @@ class DataProvider:
         self.data = pd.DataFrame()  # initialize to empty
         self.target = target
 
-    def fetch(self) -> pd.DataFrame:
-        start_str = self.start.strftime('%Y-%m-%d')
-        end_str = self.end.strftime('%Y-%m-%d')
-        self.data = yf.download(self.tickers, start=start_str, end=end_str)
-        self.data = self.data[self.target] if self.target else self.data
-        self.data.index = self.data.index.tz_localize(None)
-
+    def provide(self) -> pd.DataFrame:
+        """
+        Main class function which returns the ticker data requested.
+        ----
+        Returns pd.DataFrame with ticker returns for the class date range.
+        """
+        self.fetch()
+        self.clean()
+        self.calc_returns()
         return self.data
+
+
+    def fetch(self) -> pd.DataFrame:
+        """
+        Fetches historical for the specified asset classes.
+        ----
+        Returns pd.DataFrame with ticker data.
+        """
+        self.data = yf.download(self.tickers, self.start, self.end)
+        self.data = self.data[self.target] if self.target else self.data
+
+
 
     def clean(self, brute = True) -> None:
         """
@@ -45,54 +59,12 @@ class DataProvider:
             print("The dataset contains no null values")
         return True
 
-    @staticmethod
-    def load_etf_stock_data(etf_list, start_date=None, end_date=None, etf_ticker_map=etf_ticker_universe):
+
+    def calc_returns(self):
         """
-        Loads adjusted close, adjusted high, adjusted low, and volume data for each stock in the selected ETFs.
-
-        Parameters:
-        - etf_list: List of ETF sector symbols (e.g., ['xlf', 'xli'])
-        - start_date: Start date for the data in 'YYYY-MM-DD' format (optional)
-        - end_date: End date for the data in 'YYYY-MM-DD' format (optional)
-        - etf_ticker map: Dict with str as key, lists as values
-
-        Returns:
-        - etf_data_dict: Nested dictionary with ETF sectors as keys, and dictionaries with ticker names as keys and stock data as values.
+        Computes returns for the given data.
+        ----
+        Returns pd.DataFrame with ticker returns.
         """
-        etf_data_dict = {}
-
-        for etf in etf_list:
-            etf_lower = etf.lower()
-            etf_upper = etf.upper()
-            if etf_lower not in etf_ticker_map:
-                print(f"ETF '{etf_upper}' not recognized.")
-                continue
-
-            tickers = etf_ticker_map[etf_lower]
-            print(f"Downloading data for ETF '{etf_upper}' with tickers: {tickers}")
-
-            etf_ticker_data = {}
-
-            for ticker in tickers:
-                # Download data for the ticker individually
-                try:
-                    ticker_obj = yf.Ticker(ticker)
-                    data = ticker_obj.history(start=start_date, end=end_date, auto_adjust=True)
-
-                    if data.empty:
-                        print(f"No data retrieved for ticker '{ticker}' in ETF '{etf_upper}'.")
-                        continue
-
-                    selected_columns = ['High', 'Low', 'Close', 'Volume']
-                    ticker_data = data[selected_columns]
-
-                    # Store the data in the nested dictionary
-                    etf_ticker_data[ticker] = ticker_data
-
-                except Exception as e:
-                    print(f"Error retrieving data for ticker '{ticker}' in ETF '{etf_upper}': {e}")
-                    continue
-
-            etf_data_dict[etf_lower] = etf_ticker_data
-
-        return etf_data_dict
+        self.data = self.data.pct_change()
+        self.data = self.data.dropna()
