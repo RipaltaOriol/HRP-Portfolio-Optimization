@@ -2,10 +2,11 @@
 
 Members:
 
-- Santiago Diaz Tolivia
-- Oriol Ripalta I Maso
-- Evi Prousanidou
 - Francesco Leopardi
+- Lefteris Nazos
+- Evi Prousanidou
+- Oriol Ripalta I Maso
+- Santiago Diaz Tolivia
 
 ## Motivation
 
