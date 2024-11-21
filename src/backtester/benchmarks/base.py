@@ -1,5 +1,8 @@
+from typing import List
+
 from deepdiff import DeepHash
 import pandas as pd
+from typing import List
 
 
 class Benchmark:
@@ -9,9 +12,10 @@ class Benchmark:
         self.freq = freq
         self.starting_capital = starting_capital
 
-    def calculate(self, weight_predictions, ticker_list, data, **kwargs):
+    def calculate(self, weight_predictions: pd.DataFrame, ticker_list: List, data: pd.DataFrame, **kwargs):
 
         """
+        :param ticker_list:
         :param weight_predictions: the predictions/weights from the Agent
         :param data: the whole period data from the backtester.
         :return: case1) when we output 1 value-> a pd.Series for singular values with self.name as index, column name unnamed-dontcare (eg.in case we choose 'P' as frequency)

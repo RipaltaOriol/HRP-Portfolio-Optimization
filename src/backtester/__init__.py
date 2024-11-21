@@ -10,7 +10,7 @@ class Backtester:
     def __init__(self,start_date, end_date, ticker_list, benchmarks, save=False):
         self.start_date = start_date
         self.end_date = end_date
-        self.tickers = ticker_list
+        self.tickers = sorted(ticker_list)
         self.benchmarks = benchmarks
 
         self.data_from = None
@@ -42,6 +42,10 @@ class Backtester:
             self.data_from = self.data_date_from()
             data_provider = DataProvider(self.data_from, self.end_date, self.tickers)
             self.data = data_provider.fetch()
+
+            if self.tickers != self.data.columns.to_list():
+                self.tickers = self.data.columns.values
+                print('Tickers succesfully set to data_columns, because tickers didnt match data.columns. Check data')
 
             if self.data_from is None:
                 raise ValueError("You have to provide agents for evaluations")
@@ -106,7 +110,6 @@ class Backtester:
         }
 
         self.data = self.data[(self.data.index.date >= self.start_date) & (self.data.index.date <= self.end_date)]
-        # VERY IMPORTANT FOR INDEX MATCHING OR EVERYTHING AFTER THIS POINT ON PIPELINE IS FUCKED --> index of agent.weight_predictions and self.data should have same index at this point.
         for agent in self.agents:
             self.results[agent.sheet_name()] = copy.deepcopy(results)
             for benchmark in benchmarks:
@@ -185,6 +188,8 @@ class Backtester:
                         row += frequency_results.shape[0] + 2  # Leave a gap between sections
                     except Exception as ex:
                         raise ValueError(f"Failed to write to Excel: {ex}")
+
+                print('\n')
 
         if disp:
             print(f"\nResults successfully saved to: {filepath}")

@@ -4,6 +4,7 @@ from src.backtester import Backtester
 from datetime import date
 import src.backtester.benchmarks.evaluation as b
 from src.models.HRP_allocation import HRP
+from src.models.other_models import EqualWeights
 from ticker_codes import tickers
 
 # make sure to pip install -r requirements.txt
@@ -13,8 +14,8 @@ end_date = date(2024, 10, 29)
 
 benchmarks = [b.PNL('P'),b.Sharpe('P'), b.PNL('YM'), b.Sharpe('YM')]
 
-#agents = [Agent(RandomAllocation(months_back=1))]
-agents = [Agent(HRP(months_back=2))]
+#agents = []
+agents = [Agent(EqualWeights()),Agent(HRP(months_back=1))]
 
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,

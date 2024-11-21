@@ -1,5 +1,7 @@
 import os
 import pandas as pd
+import datetime
+from typing import List
 
 
 class WeightAllocationModel:
@@ -10,12 +12,12 @@ class WeightAllocationModel:
     def __init__(self):
         pass
 
-    def weights_allocate(self, date_from, date_to, data, ticker_list, **params):
+    def weights_allocate(self, date_from: datetime.date, date_to: datetime.date, data: pd.DataFrame, ticker_list: List, **params):
         """
-        :rtype: object
+        :param data:  dataframe with all tickers for the whole period  (the result from DataProdiver object, but adjusted for date_data_needed)
         :param date_from: First day of predictions.
         :param date_to: Last day of predictions.
-        param data: dataframe with all tickers for the whole period  ( the reslt from DataProdiver object, but adjusted for date_data_needed)
+        :param: ticker_list
         :param params: Left empty, for future development.
         :return: returns Dataframe with dataframe, with amount of rows equal to the times we update weights.
                 the index is the date we updated the dates. columns are the tickers. values the are the weights.
