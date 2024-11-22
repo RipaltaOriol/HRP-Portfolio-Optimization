@@ -15,7 +15,7 @@ end_date = date(2024, 10, 29)
 benchmarks = [b.PNL('P'),b.Sharpe('P'), b.PNL('YM'), b.Sharpe('YM')]
 
 #agents = []
-agents = [Agent(EqualWeights()),Agent(HRP(months_back=1))]
+agents = [Agent(EqualWeights()), Agent(HRP(months_back=1))]
 
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,
