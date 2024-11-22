@@ -9,13 +9,13 @@ from ticker_codes import tickers
 
 # make sure to pip install -r requirements.txt
 
-start_date = date(2024, 1, 1)
+start_date = date(2020, 1, 1)
 end_date = date(2024, 10, 29)
 
 benchmarks = [b.PNL('P'),b.Sharpe('P'), b.PNL('YM'), b.Sharpe('YM')]
 
 #agents = []
-agents = [Agent(EqualWeights()),Agent(HRP(months_back=1))]
+agents = [Agent(HRP(months_back=1))]
 
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,
