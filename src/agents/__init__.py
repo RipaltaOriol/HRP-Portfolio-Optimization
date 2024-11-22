@@ -25,10 +25,10 @@ class Agent:
         return self.model.date_data_needed(date_from, date_to)
 
     def __str__(self):
-        return "Agent with weights allocation model: {}".format(str(self.model))
+        return "Agent with weights allocation model: {}".format(str(self.model.__class__.__name__))
 
     def __hash__(self):
-        return f"{str(self.model)}".__hash__()
+        return f"{str(self.model.__class__.__name__)}".__hash__()
 
     def sheet_name(self):
-        return f"{str(self.model)}"
+        return f"{str(self.model.__class__.__name__)}"
