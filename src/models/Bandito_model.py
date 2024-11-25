@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 from base import WeightAllocationModel
 from  HRP_allocation import HRP
-from HRP_sentiment_allocation import Sentiment_Finbert
 
 # TODO: understand this functions and clean them up
 class Bandito_Model(WeightAllocationModel):

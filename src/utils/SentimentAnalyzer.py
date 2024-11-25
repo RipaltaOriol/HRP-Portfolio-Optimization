@@ -120,7 +120,8 @@ class SentimentAnalyzer:
     def calculate_finbert_aggregate_sentiment(self, sentiment_scores):
         """
         Calculate an overall sentiment score based on the FinBERT total scores of each class
-        :sentiment_scores: Dictionary of sentiment scores. Values are the total scores for each of the pos,neg,neutral cases
+
+        sentiment_scores: Dictionary of sentiment scores. Values are the total scores for each of the pos,neg,neutral cases
         :return: aggregated final sentiment score
         """
         total_score = sum(sentiment_scores.values())
