@@ -1,6 +1,5 @@
 from agents import WeightAllocationModel
 
-
 class Agent:
 
     def __init__(self, model: WeightAllocationModel):
