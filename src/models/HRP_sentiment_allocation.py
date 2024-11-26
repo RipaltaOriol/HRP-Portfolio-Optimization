@@ -1,5 +1,5 @@
 import urllib3
-from .HRP_calculator import HRP_Calculator, HRP_Calculator_2
+from .HRP_calculator import HRP_Calculator, HRP_Calculator_2, HRP_Calculator_3
 import pandas as pd
 from .base import WeightAllocationModel
 import matplotlib.pyplot as plt
@@ -44,7 +44,7 @@ class HRP_Sentiment(WeightAllocationModel):
                     sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(news)
                     overall_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
 
-            hrp_calculator = HRP_Calculator_2(past_data)
+            hrp_calculator = HRP_Calculator_3(past_data)
             hrp_weights = hrp_calculator.weights_allocate()
 
             # think about the adjustment here. There is crazy bias. if we have small weights, but crazy sentiment, there wont be adifference
