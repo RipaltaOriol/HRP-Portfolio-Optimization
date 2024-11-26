@@ -2,6 +2,7 @@
 import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import dendrogram, linkage
+import scipy.cluster.hierarchy as sch
 from scipy.spatial.distance import squareform
 from .RelationalStatistics import RelationalStatistics
 from typing import List
@@ -157,7 +158,6 @@ class HRP_Calculator:
         return weights_dict
 
 
-
 class HRP_Calculator_2:
     """
     Hierarchical Risk Parity (HRP) implementation using scipy for clustering.
@@ -174,7 +174,7 @@ class HRP_Calculator_2:
             np.ndarray: Condensed distance matrix.
         """
         corr = self.returns.corr().values
-        dist = 1 - corr
+        dist = ((1 - corr)/2.)**0.5
 
         # Ensure symmetry
         dist = (dist + dist.T) / 2
@@ -273,3 +273,111 @@ class HRP_Calculator_2:
         """
         linkage_matrix = self.perform_clustering()
         dendrogram(linkage_matrix, labels=self.returns.columns.tolist())
+
+
+class HRP_Calculator_3:
+    """
+    Hierarchical Risk Parity (HRP) implementation based on Lopez de Prado's code.
+    """
+
+    def __init__(self, returns: pd.DataFrame):
+        """
+        Initialize with a DataFrame of asset returns.
+        """
+        self.returns = returns
+        self.cov = returns.cov()
+        self.corr = returns.corr()
+
+    @staticmethod
+    def get_ivp(cov: pd.DataFrame) -> np.ndarray:
+        """
+        Compute the inverse-variance portfolio.
+        """
+        ivp = 1.0 / np.diag(cov)
+        ivp /= ivp.sum()
+        return ivp
+
+    @staticmethod
+    def get_cluster_var(cov: pd.DataFrame, cluster_items: list) -> float:
+        """
+        Compute the variance per cluster.
+        """
+        # Map integer indices to labels if needed
+        if isinstance(cluster_items[0], int):  # Check if indices are integers
+            cluster_items = cov.index[cluster_items]  # Map to labels
+
+        cov_ = cov.loc[cluster_items, cluster_items]  # Slice covariance matrix
+        w_ = HRP_Calculator_3.get_ivp(cov_).reshape(-1, 1)
+        cluster_var = np.dot(np.dot(w_.T, cov_), w_)[0, 0]
+        return cluster_var
+
+    @staticmethod
+    def get_quasi_diag(linkage: np.ndarray) -> list:
+        """
+        Sort clustered items by distance.
+        """
+        linkage = linkage.astype(int)
+        sort_ix = pd.Series([linkage[-1, 0], linkage[-1, 1]])
+        num_items = linkage[-1, 3]  # Number of original items
+
+        while sort_ix.max() >= num_items:
+            sort_ix.index = range(0, sort_ix.shape[0] * 2, 2)  # Make space
+            clusters = sort_ix[sort_ix >= num_items]  # Find clusters
+            i = clusters.index
+            j = clusters.values - num_items
+            sort_ix[i] = linkage[j, 0]  # Item 1
+            new_clusters = pd.Series(linkage[j, 1], index=i + 1)
+            sort_ix = pd.concat([sort_ix, new_clusters])   # Item 2
+            sort_ix = sort_ix.sort_index()  # Re-sort
+            sort_ix.index = range(sort_ix.shape[0])  # Re-index
+        return sort_ix.tolist()
+
+    def get_rec_bipart(self, sort_ix: list) -> pd.Series:
+        """
+        Compute HRP allocation.
+        """
+        # Convert integer indices to labels
+        sort_ix = self.returns.columns[sort_ix]
+
+        w = pd.Series(1, index=sort_ix)
+        clusters = [sort_ix.tolist()]  # Initialize all items in one cluster
+
+        while len(clusters) > 0:
+            clusters = [cluster[j:k] for cluster in clusters for j, k in ((0, len(cluster) // 2), (len(cluster) // 2, len(cluster))) if len(cluster) > 1]  # Bi-section
+            for i in range(0, len(clusters), 2):  # Parse in pairs
+                cluster_0 = clusters[i]  # Cluster 1
+                cluster_1 = clusters[i + 1]  # Cluster 2
+                var_0 = self.get_cluster_var(self.cov, cluster_0)
+                var_1 = self.get_cluster_var(self.cov, cluster_1)
+                alpha = 1 - var_0 / (var_0 + var_1)
+                w[cluster_0] *= alpha  # Weight 1
+                w[cluster_1] *= 1 - alpha  # Weight 2
+        return w
+
+    @staticmethod
+    def correl_dist(corr: pd.DataFrame) -> pd.DataFrame:
+        """
+        A distance matrix based on correlation.
+        """
+        dist = ((1 - corr) / 2.0) ** 0.5  # Distance matrix
+        return dist
+
+    def weights_allocate(self) -> pd.Series:
+        """
+        Perform the full HRP process and return the portfolio weights.
+        """
+        dist = self.correl_dist(self.corr)
+        linkage_matrix = sch.linkage(squareform(dist), method="single")
+        sort_ix = self.get_quasi_diag(linkage_matrix)
+        hrp_weights = self.get_rec_bipart(sort_ix)
+        return hrp_weights.sort_index()
+
+# Usage Example
+# if __name__ == "__main__":
+#     # Mock data
+#     np.random.seed(42)
+#     data = pd.DataFrame(np.random.randn(100, 5), columns=["A", "B", "C", "D", "E"])
+#     hrp = HRP_Calculator(data)
+#     weights = hrp.weights_allocate()
+#     print(weights)
+

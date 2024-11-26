@@ -1,6 +1,7 @@
 from .base import WeightAllocationModel
 import pandas as pd
-from .HRP_calculator import HRP_Calculator, HRP_Calculator_2
+from .HRP_calculator import HRP_Calculator, HRP_Calculator_2, HRP_Calculator_3
+from models import plot_hrp_weights
 
 
 # TODO: understand this functions and clean them up
@@ -29,7 +30,7 @@ class HRP(WeightAllocationModel):
                 # Skip this rebalance date if data is insufficient
                 continue
 
-            hrp_calculator = HRP_Calculator_2(past_data)
+            hrp_calculator = HRP_Calculator_3(past_data)
             hrp_weights = hrp_calculator.weights_allocate()
 
             if isinstance(hrp_weights, pd.Series):
@@ -40,6 +41,8 @@ class HRP(WeightAllocationModel):
             weights_df = pd.DataFrame(data=weights_data, index=[rebalance_date], columns=hrp_weights.keys())
             weights_df =  weights_df[data.columns]
             weights_list.append(weights_df)
+
+            plot_hrp_weights(hrp_weights, len(weights_list))
 
         # Concatenate all weights and sort by index (date)
         weight_predictions = pd.concat(weights_list)
