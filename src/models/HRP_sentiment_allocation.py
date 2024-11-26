@@ -1,5 +1,5 @@
 import urllib3
-from .HRP_calculator import HRP_Calculator
+from .HRP_calculator import HRP_Calculator, HRP_Calculator_2
 import pandas as pd
 from .base import WeightAllocationModel
 import matplotlib.pyplot as plt
@@ -44,26 +44,25 @@ class HRP_Sentiment(WeightAllocationModel):
                     sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(news)
                     overall_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
 
-            hrp_calculator = HRP_Calculator(past_data)
+            hrp_calculator = HRP_Calculator_2(past_data)
             hrp_weights = hrp_calculator.weights_allocate()
 
             # think about the adjustment here. There is crazy bias. if we have small weights, but crazy sentiment, there wont be adifference
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + overall_sentiments.get(ticker, 0)) for ticker in ticker_list}
 
-            # Normalize adjusted weights to sum to 1
+            # normalize adjusted weights to sum to 1
             total_weight = sum(adjusted_weights.values())
             if total_weight > 0:  # Avoid division by zero
                 normalized_weights = {ticker: weight / total_weight for ticker, weight in adjusted_weights.items()}
             else:
                 normalized_weights = {ticker: 0 for ticker in ticker_list}
 
-            # Store weights in DataFrame
             weights_df = pd.DataFrame(data=[normalized_weights.values()], index=[rebalance_date], columns=normalized_weights.keys())
             weights_list.append(weights_df)
 
             plot_hrp_weights(hrp_weights, len(weights_list))
 
-            # Concatenate all weights into a single DataFrame
+
         weight_predictions = pd.concat(weights_list)
         weight_predictions = weight_predictions.sort_index()
 

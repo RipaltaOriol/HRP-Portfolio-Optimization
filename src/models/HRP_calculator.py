@@ -2,8 +2,10 @@
 import numpy as np
 import pandas as pd
 from scipy.cluster.hierarchy import dendrogram, linkage
+from scipy.spatial.distance import squareform
 from .RelationalStatistics import RelationalStatistics
 from typing import List
+import riskfolio as rp
 
 
 class HRP_Calculator:
@@ -154,3 +156,120 @@ class HRP_Calculator:
 
         return weights_dict
 
+
+
+class HRP_Calculator_2:
+    """
+    Hierarchical Risk Parity (HRP) implementation using scipy for clustering.
+    """
+
+    def __init__(self, returns: pd.DataFrame):
+        self.returns = returns
+
+    def calculate_correlation_distance(self) -> np.ndarray:
+        """
+        Calculate the pairwise correlation distance (1 - correlation).
+
+        Returns:
+            np.ndarray: Condensed distance matrix.
+        """
+        corr = self.returns.corr().values
+        dist = 1 - corr
+
+        # Ensure symmetry
+        dist = (dist + dist.T) / 2
+        return squareform(dist)
+
+    def perform_clustering(self) -> np.ndarray:
+        """
+        Perform hierarchical clustering using the correlation distance.
+
+        Returns:
+            np.ndarray: Linkage matrix for hierarchical clustering.
+        """
+        dist_matrix = self.calculate_correlation_distance()
+        return linkage(dist_matrix, method='single')  # Single linkage clustering
+
+    def get_quasi_diagonal_order(self, linkage_matrix: np.ndarray) -> list:
+        """
+        Get the hierarchical ordering of assets based on the linkage matrix.
+
+        Args:
+            linkage_matrix (np.ndarray): Linkage matrix from hierarchical clustering.
+
+        Returns:
+            list: Ordered list of asset indices.
+        """
+        dendro = dendrogram(linkage_matrix, no_plot=True)
+        return dendro['leaves']
+
+    def weights_allocate(self) -> pd.Series:
+        """
+        Calculate asset weights using Hierarchical Risk Parity.
+
+        Returns:
+            pd.Series: HRP weights for the portfolio, indexed by asset names.
+        """
+        # Covariance matrix
+        cov = self.returns.cov().values
+        linkage_matrix = self.perform_clustering()
+        sorted_indices = self.get_quasi_diagonal_order(linkage_matrix)
+
+        # Quasi-diagonalized covariance matrix
+        ordered_cov = cov[np.ix_(sorted_indices, sorted_indices)]
+        ordered_assets = self.returns.columns[sorted_indices]
+
+        # Calculate HRP weights
+        weights = pd.Series(1, index=ordered_assets)
+        clusters = [ordered_assets.tolist()]
+
+        while len(clusters) > 0:
+            cluster = clusters.pop(0)
+            if len(cluster) == 1:
+                continue
+
+            # Split cluster into two halves
+            left_cluster = cluster[:len(cluster) // 2]
+            right_cluster = cluster[len(cluster) // 2:]
+
+            # Calculate variance of each cluster
+            left_var = self._cluster_variance(ordered_cov, left_cluster)
+            right_var = self._cluster_variance(ordered_cov, right_cluster)
+
+            # Allocate weights inversely proportional to variance
+            total_var = left_var + right_var
+            weights[left_cluster] *= right_var / total_var
+            weights[right_cluster] *= left_var / total_var
+
+            # Add sub-clusters to the queue
+            clusters.append(left_cluster)
+            clusters.append(right_cluster)
+
+        return weights.sort_index()
+
+    def _cluster_variance(self, cov: np.ndarray, cluster: list) -> float:
+        """
+        Calculate the variance of a cluster based on the covariance matrix.
+
+        Args:
+            cov (np.ndarray): Covariance matrix.
+            cluster (list): List of asset indices or tickers in the cluster.
+
+        Returns:
+            float: Cluster variance.
+        """
+        # Map tickers to their integer positions if cluster contains strings
+        if isinstance(cluster[0], str):
+            cluster = [self.returns.columns.get_loc(ticker) for ticker in cluster]
+
+        # Extract the sub-matrix for the cluster
+        cluster_cov = cov[np.ix_(cluster, cluster)]
+        weights = np.ones(len(cluster))  # Equal weights for the cluster
+        return np.dot(weights, np.dot(cluster_cov, weights))
+
+    def plot_dendrogram(self):
+        """
+        Plot the hierarchical clustering dendrogram.
+        """
+        linkage_matrix = self.perform_clustering()
+        dendrogram(linkage_matrix, labels=self.returns.columns.tolist())

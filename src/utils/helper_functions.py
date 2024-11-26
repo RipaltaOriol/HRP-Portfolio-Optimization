@@ -12,7 +12,10 @@ def plot_hrp_weights(hrp_weights, period):
         weights_df (DataFrame): Weights DataFrame to determine the period.
     """
     stock_numbers = range(1, len(hrp_weights) + 1)
-    weights = list(hrp_weights.values())
+    if isinstance(hrp_weights, pd.Series):
+        weights = hrp_weights.to_list()
+    else:
+        weights = list(hrp_weights.values())
 
     plt.figure(figsize=(10, 6))
     plt.plot(stock_numbers, weights, marker='o', linestyle='-', color='b')

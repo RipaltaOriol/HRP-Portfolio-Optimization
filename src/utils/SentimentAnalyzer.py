@@ -98,6 +98,7 @@ class SentimentAnalyzer:
                 total_articles -= 1
                 continue
 
+            # if article description content is more than 512 characters, it creates a problem for FinbErt. Thus we take up to the first 512 characters.
             truncated_content = content[:512]
 
             try:
