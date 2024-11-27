@@ -3,11 +3,12 @@ import asyncio
 import pandas as pd
 import requests
 import datetime
+from utils import polygon_api_key
 
 
 class MarketCapFetcher:
     def __init__(self):
-        self.polygon_api_key = 'LTLVSbi7rBjyjJtCpmLuTDPPhFsNSCyy'
+        self.polygon_api_key = polygon_api_key
 
     def get_next_trading_day(self, date):
         """

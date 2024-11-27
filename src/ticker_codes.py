@@ -62,3 +62,5 @@ tickers = [
     "AAL", "UAL", "MAR", "HLT", "MCD", "YUM", "CMG", "DPZ", "DRI", "BBY",
     "LOW", "TJX", "ROST", "DG", "DLTR", "AZO", "ORLY", "AAP", "KMX", "TSLA"
 ]
+
+polygon_api_key ='LTLVSbi7rBjyjJtCpmLuTDPPhFsNSCyy'
