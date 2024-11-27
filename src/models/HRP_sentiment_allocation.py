@@ -1,3 +1,5 @@
+import datetime
+
 import urllib3
 from .HRP_calculator import HRP_Calculator, HRP_Calculator_2, HRP_Calculator_3
 import pandas as pd
@@ -57,7 +59,7 @@ class HRP_Sentiment(WeightAllocationModel):
         return weight_predictions
 
 
-    def add_sentiment(self, start_date, end_date, ticker_list, hrp_weights, rebalance_date, **params):
+    def add_sentiment(self, start_date, end_date, ticker_list, hrp_weights: pd.Series, rebalance_date: datetime.date, **params):
 
         sentiment_scores = {}
         overall_sentiments = {}
@@ -74,7 +76,7 @@ class HRP_Sentiment(WeightAllocationModel):
                 sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(news)
                 overall_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
 
-        # think about the adjustment here. There is crazy bias. if we have small weights, but crazy sentiment, there wont be adifference
+        # think about the adjustment here. There is crazy bias. if we have small weights, but crazy sentiment, there won't be a difference
         adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + overall_sentiments.get(ticker, 0)) for ticker in ticker_list}
 
         # normalize adjusted weights to sum to 1
