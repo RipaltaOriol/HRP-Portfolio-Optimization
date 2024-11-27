@@ -15,8 +15,9 @@ end_date = date(2024, 4, 29)
 
 benchmarks = [b.PNL('P'),b.Sharpe('P'), b.PNL('YM'), b.Sharpe('YM')]
 
-#agents = []
-agents = [Agent(HRP(months_back=1))]
+# agents = []
+# months_back determines the amount of data used to make any prediction/weights_allocations
+agents = [Agent(MarketCapWeights())]
 
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,

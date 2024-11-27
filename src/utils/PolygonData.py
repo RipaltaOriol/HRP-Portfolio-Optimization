@@ -11,37 +11,29 @@ class MarketCapFetcher:
 
     def get_next_trading_day(self, date):
         """
-        Check if the given date is a trading day. If not (weekend or holiday), return the next trading day.
+        Check if the given date is a valid trading day.
+        Here we use a random ticker like 'AAPL' to check if the 'date' has been a valid trading day.
+
+        return: date if it is a valid trading day or next available trading day.
         """
-        url = "https://api.polygon.io/v1/marketstatus/upcoming"
-        params = {"apiKey": self.polygon_api_key}
+        while True:
+            url = f'https://api.polygon.io/v1/open-close/AAPL/{date.strftime("%Y-%m-%d")}'
+            params = {"apiKey": self.polygon_api_key}
 
-        try:
-            response = requests.get(url, params=params, timeout=5)
-            response.raise_for_status()
-            holidays = response.json()
+            try:
+                response = requests.get(url, params=params, timeout=5)
+                response.raise_for_status()
+                result = response.json()
 
-            # Convert the date to datetime.date for easier comparison
-            date_obj = datetime.datetime.strptime(date, "%Y-%m-%d").date()
+                if result['status'] == "OK":
+                    return date.strftime("%Y-%m-%d")
 
-            # Loop to find the next valid trading day
-            while True:
-                # Skip weekends
-                if date_obj.weekday() >= 5:  # Saturday = 5, Sunday = 6
-                    date_obj += datetime.timedelta(days=1)
-                    continue
+                date = date + datetime.timedelta(days=1)
 
-                # Skip holidays
-                holiday_dates = [datetime.datetime.strptime(holiday["date"], "%Y-%m-%d").date() for holiday in holidays]
-                if date_obj in holiday_dates:
-                    date_obj += datetime.timedelta(days=1)
-                    continue
+            except requests.exceptions.RequestException as e:
+                print(f"Error checking trading day: {e}")
+                date += datetime.timedelta(days=1)
 
-                # Found a valid trading day
-                return date_obj.strftime("%Y-%m-%d")
-        except requests.exceptions.RequestException as e:
-            print(f"Error checking next trading day: {e}")
-            return date  # Fallback to the given date
 
     async def fetch_price_data_async(self, session: aiohttp.ClientSession, ticker, date):
         """
