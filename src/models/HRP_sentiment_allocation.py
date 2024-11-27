@@ -34,6 +34,7 @@ class HRP_Sentiment(WeightAllocationModel):
             hrp_calculator = HRP_Calculator_3(past_data)
             hrp_weights = hrp_calculator.weights_allocate()
 
+
             if self.include_sentiment is False:
                 if isinstance(hrp_weights, pd.Series):
                     weights_data = [hrp_weights.values]
@@ -44,7 +45,7 @@ class HRP_Sentiment(WeightAllocationModel):
                 weights_df = weights_df[data.columns]
 
             else:
-                weights_df = self.add_sentiment(start_date, end_date,ticker_list, data, hrp_weights, rebalance_date)
+                weights_df = self.add_sentiment(start_date, end_date, data, hrp_weights, rebalance_date)
 
             weights_list.append(weights_df)
 
@@ -56,7 +57,7 @@ class HRP_Sentiment(WeightAllocationModel):
         return weight_predictions
 
 
-    def add_sentiment(self, start_date, end_date, ticker_list, data, hrp_weights, rebalance_date, **params):
+    def add_sentiment(self, start_date, end_date, ticker_list, hrp_weights, rebalance_date, **params):
 
         sentiment_scores = {}
         overall_sentiments = {}
