@@ -65,7 +65,7 @@ class MarketCapWeights(WeightAllocationModel):
             pd.DataFrame: DataFrame of market capitalization for each ticker and the given date.
         """
 
-        trading_day = self.MarketCapFetcher.get_next_trading_day(date.strftime("%Y-%m-%d"))
+        trading_day = self.MarketCapFetcher.get_next_trading_day(date)
 
         async with aiohttp.ClientSession() as session:
             tasks = [self.MarketCapFetcher.fetch_market_cap_for_ticker(session, ticker, trading_day) for ticker in ticker_list]
@@ -88,6 +88,7 @@ class MarketCapWeights(WeightAllocationModel):
             # Fetch market cap data for the rebalance date
 
             market_cap_data = asyncio.run(self.calculate_market_cap(rebalance_date, ticker_list))
+            market_cap_data.index = [rebalance_date]
 
             if market_cap_data.empty or market_cap_data.iloc[0].sum() == 0:
                 print(f"Skipping {rebalance_date} due to insufficient market cap data.")
