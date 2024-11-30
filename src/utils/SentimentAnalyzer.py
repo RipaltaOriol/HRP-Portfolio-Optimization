@@ -29,6 +29,8 @@ class SentimentAnalyzer:
         params = {'ticker': ticker,
                   'published_utc.gte': start_date.strftime('%Y-%m-%d'),
                   'published_utc.lte': end_date.strftime('%Y-%m-%d'),
+                  'limit': 75,
+                  'sort': 'published_utc',
                   'apiKey': self.api_key}
 
         session = requests.Session()
@@ -49,7 +51,12 @@ class SentimentAnalyzer:
         Fetch news articles asynchronously for a given ticker.
         """
         url = "https://api.polygon.io/v2/reference/news"
-        params = {'ticker': ticker, 'published_utc.gte': start_date.strftime('%Y-%m-%d'), 'published_utc.lte': end_date.strftime('%Y-%m-%d'), 'apiKey': self.api_key}
+        params = {'ticker': ticker,
+                  'published_utc.gte': start_date.strftime('%Y-%m-%d'),
+                  'published_utc.lte': end_date.strftime('%Y-%m-%d'),
+                  'limit': 100,
+                  'sort': 'published_utc',
+                  'apiKey': self.api_key}
 
         try:
             async with session.get(url, params=params, timeout=5) as response:
