@@ -60,9 +60,6 @@ class HRP_Sentiment(WeightAllocationModel):
 
     def add_sentiment(self, start_date, end_date, ticker_list, hrp_weights: pd.Series, rebalance_date: datetime.date, linear_adjustment=False, **params):
 
-        sentiment_scores = {}
-        aggregated_sentiments = {}
-
         # if statement to get polygon data asynchronously or not
         if self.async_getter:
             aggregated_sentiments = self.async_sentiment_getter(start_date, end_date, ticker_list)
