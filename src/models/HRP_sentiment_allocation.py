@@ -58,40 +58,27 @@ class HRP_Sentiment(WeightAllocationModel):
 
         return weight_predictions
 
-
     def add_sentiment(self, start_date, end_date, ticker_list, hrp_weights: pd.Series, rebalance_date: datetime.date, linear_adjustment=False, **params):
 
         sentiment_scores = {}
-        overall_sentiments = {}
+        aggregated_sentiments = {}
 
         # if statement to get polygon data asynchronously or not
         if self.async_getter:
-            news = asyncio.run(self.sentiment_analyzer.fetch_all_ticker_news(start_date, end_date, ticker_list))
-            for ticker, ticker_news in zip(ticker_list, news):
-                filtered_news = [article for article in ticker_news if article['publisher']['homepage_url'] != 'https://www.zacks.com/']
-                ticker_news = filtered_news
-
-                sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(ticker_news)
-                overall_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
+            aggregated_sentiments = self.async_sentiment_getter(start_date, end_date, ticker_list)
         else:
-            for ticker in ticker_list:
-                ticker_news = self.sentiment_analyzer.fetch_ticker_news_with_retries(start_date, end_date, ticker)
-                filtered_news = [article for article in ticker_news if article['publisher']['homepage_url'] != 'https://www.zacks.com/']
-                ticker_news = filtered_news
-
-                sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(ticker_news)
-                overall_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
+            aggregated_sentiments = self.sentiment_getter(start_date, end_date, ticker_list)
 
         # think about the adjustment here. There is crazy bias. if we have small weights, but crazy sentiment, there won't be a difference
         if linear_adjustment:
-            adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + overall_sentiments.get(ticker, 0)) for ticker in ticker_list}
+            adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
         else:
             k = 1.75  # You can adjust k to control the impact of sentiment
-            adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * np.exp(k * overall_sentiments.get(ticker, 0)) for ticker in ticker_list}
+            adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * np.exp(k * aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
 
         # normalize adjusted weights to sum to 1
         total_weight = sum(adjusted_weights.values())
-        if total_weight > 0:  # Avoid division by zero
+        if total_weight > 0:  # avoid division by zero, else statement here should never be triggered
             normalized_weights = {ticker: weight / total_weight for ticker, weight in adjusted_weights.items()}
         else:
             normalized_weights = {ticker: 0 for ticker in ticker_list}
@@ -99,3 +86,37 @@ class HRP_Sentiment(WeightAllocationModel):
         weights_df = pd.DataFrame(data=[normalized_weights.values()], index=[rebalance_date], columns=normalized_weights.keys())
 
         return weights_df
+
+    def sentiment_getter(self, start_date, end_date, ticker_list, **params):
+
+        sentiment_scores = {}
+        aggregated_sentiments = {}
+
+        for ticker in ticker_list:
+            ticker_news = self.sentiment_analyzer.fetch_ticker_news_with_retries(start_date, end_date, ticker)
+            filtered_news = [article for article in ticker_news if article['publisher']['homepage_url'] != 'https://www.zacks.com/']
+            ticker_news = filtered_news
+
+            sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(ticker_news)
+            aggregated_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
+
+        return aggregated_sentiments
+
+    def async_sentiment_getter(self, start_date, end_date, ticker_list, **params):
+
+        sentiment_scores = {}
+        aggregated_sentiments = {}
+
+        news = asyncio.run(self.sentiment_analyzer.fetch_all_ticker_news(start_date, end_date, ticker_list))
+        for ticker, ticker_news in zip(ticker_list, news):
+            filtered_news = [article for article in ticker_news if article['publisher']['homepage_url'] != 'https://www.zacks.com/']
+            ticker_news = filtered_news
+
+            sentiment_scores[ticker] = self.sentiment_analyzer.calculate_finbert_sentiment(ticker_news)
+            aggregated_sentiments[ticker] = self.sentiment_analyzer.calculate_finbert_aggregate_sentiment(sentiment_scores[ticker])
+
+        return aggregated_sentiments
+
+
+
+
