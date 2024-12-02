@@ -1,8 +1,8 @@
 from typing import List
-
 from deepdiff import DeepHash
 import pandas as pd
 from typing import List
+import yfinance as yf
 
 
 class Benchmark:
@@ -11,6 +11,7 @@ class Benchmark:
         self.name = name
         self.freq = freq
         self.starting_capital = starting_capital
+
 
     def calculate(self, weight_predictions: pd.DataFrame, ticker_list: List, data: pd.DataFrame, **kwargs):
 
@@ -54,6 +55,17 @@ class Benchmark:
             else:
                 return pd.DataFrame({name: [data]}, index=['period'])
         return data
+
+    @staticmethod
+    def get_sp500_returns(data):
+        sp500= yf.download('^GSPC', start=data.index[0].strftime("%Y-%m-%d"), end=data.index[-1].strftime("%Y-%m-%d"), progress=False)
+        sp500['sp500'] = sp500['Adj Close'].pct_change()
+        sp500_data = sp500[['sp500']].ffill()
+
+        return sp500_data
+
+
+
 
 
 

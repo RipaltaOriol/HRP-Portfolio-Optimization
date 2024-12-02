@@ -1,4 +1,6 @@
 from backtester.benchmarks.base import Benchmark
+import pandas as pd
+import numpy as np
 
 
 
@@ -83,3 +85,36 @@ class Volatility(Benchmark):
         volatility_df = rolling_volatility.to_frame(name="Volatility")
 
         return volatility_df.reindex(data.index).fillna(0)
+
+
+class Beta(Benchmark):
+
+    def __init__(self, freq='D'):
+        super(Beta, self).__init__(name="Beta", freq=freq)
+        self.sp500_returns = None
+
+    def calculate(self, weight_predictions, ticker_list, data, **kwargs):
+        """
+        Calculate beta of the portfolio compared to the market benchmark.
+        """
+        # Calculate portfolio returns
+        portfolio_returns = (weight_predictions * data[ticker_list]).sum(axis=1)
+        self.sp500_returns = self.get_sp500_returns(data)
+
+        def beta_for_group(group):
+            # Calculate covariance and variance for each group
+            covariance = group['Portfolio Returns'].cov(group[market_column])
+            market_variance = group[market_column].var()
+            return covariance / market_variance if market_variance != 0 else 0
+
+
+        # Group data by the specified frequency
+        grouped_data = self.groupby_freq(data, self.freq)
+
+        # Calculate beta for each group
+        beta_values = grouped_data.apply(beta_for_group)
+
+        # Convert to DataFrame and return
+        beta_df = beta_values.to_frame(name='Beta')
+        return beta_df
+
