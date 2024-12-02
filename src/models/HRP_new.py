@@ -138,24 +138,49 @@ class HRPOptimizer:
             
             # Create clusters by splitting the cluster_items in half
             cluster_items = [
-                i[j:k]
-                for i in cluster_items
-                for j, k in ((0, len(i) // 2), (len(i) // 2, len(i)))
-                if len(i) > 1
+                cluster_item[j:k]
+                for cluster_item in cluster_items
+                for j, k in ((0, len(cluster_item) // 2), (len(cluster_item) // 2, len(cluster_item)))
+                if len(cluster_item) > 1
             ]  
-            print(cluster_items)
             # For each pair, optimize locally.
-            for i in range(0, len(cluster_items), 2):
-                first_cluster = cluster_items[i]
+            for cluster_item in range(0, len(cluster_items), 2):
+                first_cluster = cluster_items[cluster_item]
+
                 #print(first_cluster)
-                second_cluster = cluster_items[i + 1]
+                second_cluster = cluster_items[cluster_item + 1]
+
                 # Form the inverse variance portfolio for this pair
-                first_variance = HRPOptimizer.cluster_variance(cov_matrix, first_cluster)
-                second_variance = HRPOptimizer.cluster_variance(cov_matrix, second_cluster)
-                alpha = 1 - first_variance / (first_variance + second_variance)
+                first_cluster_variance = self.cluster_variance(cov_matrix, first_cluster)
+                second_cluster_variance = self.cluster_variance(cov_matrix, second_cluster)
+                alpha = 1 - first_cluster_variance / (first_cluster_variance + second_cluster_variance)
                 w[first_cluster] *= alpha  # weight 1
                 w[second_cluster] *= 1 - alpha  # weight 2
         return w
+    
+    def optimize(self, linkage_method = 'single') -> pd.DataFrame:
+
+        """
+        Compute the weights of the HRP portfolio. It does so through various steps.
+        The first is recursive bisection, which clusters assets into a hierarchical tree.
+        The algorithm will then run the cluster_variance function to compute the variance per cluster.
+        This will allow the algorithm to optimize based on variance.
+        
+        
+        Parameters
+        ----------
+        linkage_method : str
+            The following are the possible methods that the scipy.cluster.hierarchy.linkage function can take:
+            "single", "complete", "average", "weighted", "centroid", "median", "ward".
+            See Scipy's documentation for more information about each. 
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.cluster.hierarchy.linkage.html
+        
+        -------
+        float
+        returns the weights of the HRP portfolio.
+        """
+
+        
 
 
 
