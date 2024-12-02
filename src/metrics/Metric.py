@@ -5,29 +5,33 @@ import pandas as pd
 from typing import List
 
 
-class Benchmark:
-
-    def __init__(self, name='Base_Benchmark', freq='M', starting_capital=10000000):
+class Metric:
+    def __init__(self, name: str, freq: str, starting_capital: int = 10000):
         self.name = name
         self.freq = freq
         self.starting_capital = starting_capital
-
-    def calculate(self, weight_predictions: pd.DataFrame, ticker_list: List, data: pd.DataFrame, **kwargs):
-
+    
+    def calculate(self, weights: pd.DataFrame, tickers: List[str], data: pd.DataFrame, **kwargs):
+        """    
+        Parameters
+        ----------
+        weights: pd.DataFrame
+            The dataframe of weights provided by the model
+        tikcers: List[str]
+            A list of tickers used in the model
+        data: pd.DataFrame
+            A dataframe of the data used in the backtesting
+        -------
+        Returns the calculation for the target metric
         """
-        :param ticker_list:
-        :param weight_predictions: the predictions/weights from the Agent
-        :param data: the whole period data from the backtester.
-        :return: case1) when we output 1 value-> a pd.Series for singular values with self.name as index, column name unnamed-dontcare (eg.in case we choose 'P' as frequency)
-                 case2) when we want to output more than 1 value -> a pd.Dataframe or pd.Series with the correct indexing based on the groupby_freq staticmethod
-        """
-        pass
+        return NotImplementedError
 
     def __hash__(self):
+        # TODO: missing docs
         return DeepHash(self)[self]
 
-    @staticmethod
     def groupby_freq(dataframe, freq):
+        # TODO: missing docs
         if freq == 'D':
             return dataframe.groupby([dataframe.index.date])
         elif freq == 'W':
@@ -41,9 +45,10 @@ class Benchmark:
         elif freq == 'P':
             return dataframe
 
-    # should be added for non linear metrics
-    @staticmethod
+    
     def to_frame_and_indexing(data, freq, name):
+        # TODO: missing docs
+        # TODO: should be added for non linear metrics
         if isinstance(data, pd.DataFrame):
             return data
 

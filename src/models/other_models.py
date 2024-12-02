@@ -2,7 +2,7 @@ from .base import WeightAllocationModel#
 import pandas as pd
 from datetime import timedelta
 import datetime
-from models import MarketCapFetcher
+# from models import MarketCapFetcher
 import aiohttp
 import asyncio
 

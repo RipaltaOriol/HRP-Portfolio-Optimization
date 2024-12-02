@@ -19,7 +19,7 @@ class HRP(WeightAllocationModel):
 
         # Iterate over each rebalance date within the specified date range - updation frequency 'MS'
         for rebalance_date in pd.date_range(start=date_from, end=date_to, freq='MS'):
-
+            print(rebalance_date, "***")
             # define the past subperiod for calculating returns each time
             start_date = rebalance_date - pd.DateOffset(months=self.months_back)
             end_date = rebalance_date - pd.DateOffset(days=1)
@@ -42,7 +42,7 @@ class HRP(WeightAllocationModel):
             weights_df =  weights_df[data.columns]
             weights_list.append(weights_df)
 
-            plot_hrp_weights(hrp_weights, len(weights_list))
+            # plot_hrp_weights(hrp_weights, len(weights_list))
 
         # Concatenate all weights and sort by index (date)
         weight_predictions = pd.concat(weights_list)

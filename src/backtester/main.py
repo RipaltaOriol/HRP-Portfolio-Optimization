@@ -1,90 +1,102 @@
 import pandas as pd
 from agents.main import Agent
 import copy
+from datetime import datetime
 from utils.DataProvider import DataProvider
+from utils.Frequency import Frequency
 import os
-from backtester import WeightAllocationModel
+# from backtester import WeightAllocationModel
+from models.base import WeightAllocationModel
+from typing import List
 
 class Backtester:
 
-    def __init__(self,start_date, end_date, ticker_list, benchmarks, save=False):
+    def __init__(self, start_date: datetime, simulation_date: datetime, end_date: datetime, frequency: Frequency, tickers: List[str], metrics, save=False):
         self.start_date = start_date
+        self.simulation_date = simulation_date
         self.end_date = end_date
-        self.tickers = sorted(ticker_list)
-        self.benchmarks = benchmarks
-
-        self.data_from = None
-        self.data = None
+        self.frequency = frequency # TODO: make this a enum
+        self.tickers = sorted(tickers)
+        self.metrics = metrics
 
         self.agents = []
-        self.new_agents = []
-        self.changed_agents = []
-        self.benchmarks = benchmarks
+        self.data = None
+
         self.results = {}
         self.excel_writer = None
-
         self.save = save
         WeightAllocationModel.save = save
 
-    def data_date_from(self):
+    
+    def execute(self):
+        """
+        Main function to execute the backtest class
+        """
+        self.fetch_data()
+        self.simulate()
+        self.evaluate()
 
-        date_from = self.start_date
-        for agent in self.agents:
-            temp = agent.date_data_needed(self.start_date, self.end_date)
-            if pd.Timestamp(temp) < pd.Timestamp(date_from):
-                date_from = temp
+        return True
+        
+        
+        return results
 
-        return date_from
-
-    def get_data(self):
-
-        if self.new_agents:
-            self.data_from = self.data_date_from()
-            data_provider = DataProvider(self.data_from, self.end_date, self.tickers)
+    def fetch_data(self):
+        """
+        Parameters
+        ----------
+        Assigns the fetch tickers data to a class variable: self.data
+        """
+        # TODO: CHECK THAT END DATE IS NOT GREATER THAT TODAY'S DATE
+        if self.agents: # TODO: rethink this condition
+            data_provider = DataProvider(self.start_date, self.end_date, self.tickers)
             self.data = data_provider.provide()
 
             if self.tickers != self.data.columns.to_list():
-                self.tickers = self.data.columns.values
+                print(self.tickers, self.data.columns.to_list())
+                # self.tickers = self.data.columns.values
+                print("Something went wrong")
                 print('Tickers succesfully set to data_columns, because tickers didnt match data.columns. Check data')
 
-            if self.data_from is None:
-                raise ValueError("You have to provide agents for evaluations")
 
-    def add_agent(self, agent: Agent):
-        """
-        Adds an agent to the simulation/
-        :param agent: Agent object to be used for simulation
+    def add_agent(self, agent: List[Agent]) -> None:
+        """    
+        Parameters
+        ----------
+        agents: List[Agent]
+            A list of agents/models
+        -------
+        Adds the given agents to the backtester
         """
         self.agents.append(agent)
-        self.new_agents.append(agent)
-
-    def remove_agent(self, agent):
-        """
-        Removes an already added agent from the simulation.
-        :param agent: Agent instance of the agent you want to be removed.
-        """
-        try:
-            self.agents.remove(agent)
-        except ValueError:
-            raise Warning("Model was not found in the evaluator")
-
-    def clear_agents(self):
-        """
-        Deletes all agents from the simulation. Results will be still be available.
-        """
-        self.agents = []
 
 
-    def agents_allocate(self):
+    def allocate_agents(self, training_data: pd.DataFrame) -> pd.DataFrame:
         """
-        In this method all agents, one by one, predict their backtests for the simulation period.
+        Parameters
+        training_data: pd.DataFrame
+            A dataframe with date rows and columns tickers with returns as cells
+        ----------
+        Exectues the each of the agents/models for the given training data
         """
-        for agent in self.new_agents:
-            print(f"Predictions for {agent}, are being calculated.")
-            agent.weights_allocate(self.start_date, self.end_date, self.tickers, self.data)
-            print(f"Predictions for {agent}, done.\n")
-
-    def evaluate_agents(self, benchmarks=None):
+        for agent in self.agents:
+            agent.allocate(training_data)
+    
+    def simulate(self):
+        # TODO: missing docstring
+        for rebalance_date in pd.date_range(start = self.simulation_date, end = self.end_date, freq = self.frequency.value):
+            print(rebalance_date, "____")
+            # print(rebalance_date, "rebalance date")
+            training_data = self.data.loc[self.start_date : rebalance_date]
+            # TODO: check that data is not empty
+            self.allocate_agents(training_data)
+            # print(type(allocation))
+            # now I must store the allocations
+            
+        # return NotImplementedError
+    def evaluate(self):
+        # TODO: ensure the agents have been exeucted
+        # TODO: refactor code & docstring
         """
         This is where the agents are evaluated based on specified benchmarks. Returns a dictionary that has as keys,
         the frequencies of the benchmarks, e.g. "D" for daily benchmarks, "W" for weekly etc. and as values the
@@ -92,55 +104,47 @@ class Backtester:
         :param benchmarks: Benchmarks that the agents will be evaluated at.
         :return: Dictionary with the specified format.
         """
-        try:
-
-            weight_predictions = self.agents[0].weight_predictions
-        except:
-            raise ValueError(
-                "Agents haven't decided their weights for the whole period yet, please run agent.weights_allocate first!"
-            )
-
-        results = {
-            "D": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.date]).sum().index),
-            "W": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year, weight_predictions.index.isocalendar().week]).sum().index),
-            "M": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.month]).sum().index),
-            "Y": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year]).sum().index),
-            "YM": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year, weight_predictions.index.month]).sum().index),
-            "P": pd.DataFrame(),
-        }
-
-        self.data = self.data[(self.data.index.date >= self.start_date) & (self.data.index.date <= self.end_date)]
         for agent in self.agents:
-            self.results[agent.sheet_name()] = copy.deepcopy(results)
-            for benchmark in benchmarks:
-                benchmark_result = benchmark.calculate(agent.weight_predictions, self.tickers, self.data)
-                self.results[agent.sheet_name()][benchmark.freq][benchmark.name] = benchmark_result
-        return self.results
+            history_weights = agent.get_allocations()
+            history_weights_T = history_weights.T
 
-    def run(self):
-        """
-        Runs the simulation for all agents added. After the run has ended all agents have their predictions and
-        quantities calculated.
-        """
-        # Get data
-        self.get_data()
+            # Ensure index are of type datetime
+            history_weights_T.index = pd.to_datetime(history_weights_T.index)
+            self.data.index = pd.to_datetime(self.data.index)
 
-        # Agents calculate the weight allocations
-        self.agents_allocate()
+            for metric in self.metrics:
+                return metric.calculate(history_weights_T, self.data)
+                pass
+                # considerations: capital
 
-    def run_n_evaluate(self):
-        """
-        Runs the simulation and evaluate the agents. Returns the dictionary with the results.
-        :return: Dictionary with the specified format see evaluate_agents for details on format.
-        """
-        # Run first
-        self.run()
 
-        # Evaluate the agents based on the actual prices
-        results = self.evaluate_agents(self.benchmarks)
+        # try:
 
-        return results
+        #     weight_predictions = self.agents[0].weight_predictions
+        # except:
+        #     raise ValueError(
+        #         "Agents haven't decided their weights for the whole period yet, please run agent.weights_allocate first!"
+        #     )
 
+        # results = {
+        #     "D": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.date]).sum().index),
+        #     "W": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year, weight_predictions.index.isocalendar().week]).sum().index),
+        #     "M": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.month]).sum().index),
+        #     "Y": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year]).sum().index),
+        #     "YM": pd.DataFrame(index=weight_predictions.groupby([weight_predictions.index.year, weight_predictions.index.month]).sum().index),
+        #     "P": pd.DataFrame(),
+        # }
+
+        # self.data = self.data[(self.data.index.date >= self.start_date) & (self.data.index.date <= self.end_date)]
+        # for agent in self.agents:
+        #     self.results[agent.sheet_name()] = copy.deepcopy(results)
+        #     for benchmark in self.metrics:
+        #         benchmark_result = benchmark.calculate(agent.weight_predictions, self.tickers, self.data)
+        #         self.results[agent.sheet_name()][benchmark.freq][benchmark.name] = benchmark_result
+        # return self.results
+
+
+    # TODO: refactor this
     def results_to_excel2(self, filename: str, save_dir=".", disp=False):
         """
         Export the results of the simulation to an Excel file and display them in the console.

@@ -3,8 +3,8 @@ from .HRP_calculator import HRP_Calculator, HRP_Calculator_2, HRP_Calculator_3
 import pandas as pd
 from .base import WeightAllocationModel
 import matplotlib.pyplot as plt
-from models import plot_hrp_weights
-from models import SentimentAnalyzer
+# from models import plot_hrp_weights
+# from models import SentimentAnalyzer
 import asyncio
 
 
@@ -13,7 +13,7 @@ class HRP_Sentiment(WeightAllocationModel):
         super(HRP_Sentiment, self).__init__()
         self.months_back = months_back
         self.async_getter = async_getter
-        self.sentiment_analyzer = SentimentAnalyzer()
+        # self.sentiment_analyzer = SentimentAnalyzer()
 
     def date_data_needed(self, date_from, date_to):
         return date_from - pd.DateOffset(months=self.months_back)
@@ -60,7 +60,7 @@ class HRP_Sentiment(WeightAllocationModel):
             weights_df = pd.DataFrame(data=[normalized_weights.values()], index=[rebalance_date], columns=normalized_weights.keys())
             weights_list.append(weights_df)
 
-            plot_hrp_weights(hrp_weights, len(weights_list))
+            # plot_hrp_weights(hrp_weights, len(weights_list))
 
 
         weight_predictions = pd.concat(weights_list)
