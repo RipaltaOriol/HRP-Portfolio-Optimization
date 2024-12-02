@@ -108,28 +108,58 @@ class HRPOptimizer:
     
     def raw_hrp_allocation(self, cov_matrix: pd.DataFrame, tickers: list) -> pd.DataFrame:
         """
-        Compute the raw hierarchical risk parity weights.
+        Compute the weights of the HRP portfolio. It does so through various steps.
+        The first is recursive bisection, which clusters assets into a hierarchical tree.
+        The algorithm will then run the cluster_variance function to compute the variance per cluster.
+        This will allow the algorithm to optimize based on variance.
+        
         
         Parameters
         ----------
         cov_matrix : pd.DataFrame
             A pandas DataFrame of asset covariance matrix.
-        
+
         tickers : list
-            a list of the ticker names.
+            a list of the ticker names to compute the weights for.
         
         -------
-        pd.DataFrame
+        float
         returns the weights.
         """
-        # Compute the quasi-diagonal matrix
-        ordered_tickers = self.quasi_diagonalization(cov_matrix)
-        
-        # Compute the weights
-        weights = np.zeros(len(tickers))
-        for i, ticker in enumerate(ordered_tickers):
-            weights[ticker] = self.cluster_variance(cov_matrix, tickers[ticker])
-        
-        return weights
+
+        # Create a series of ones with the tickers as the index (equal-weights)
+        w = pd.Series(1, index=tickers)
+
+        # Create a list of the tickers called cluster_items
+        cluster_items = [tickers]  
+
+        # Throughout the process the length of the cluster must be greater than 0
+        while len(cluster_items) > 0:
+            
+            # Create clusters by splitting the cluster_items in half
+            cluster_items = [
+                i[j:k]
+                for i in cluster_items
+                for j, k in ((0, len(i) // 2), (len(i) // 2, len(i)))
+                if len(i) > 1
+            ]  
+            print(cluster_items)
+            # For each pair, optimize locally.
+            for i in range(0, len(cluster_items), 2):
+                first_cluster = cluster_items[i]
+                #print(first_cluster)
+                second_cluster = cluster_items[i + 1]
+                # Form the inverse variance portfolio for this pair
+                first_variance = HRPOptimizer.cluster_variance(cov_matrix, first_cluster)
+                second_variance = HRPOptimizer.cluster_variance(cov_matrix, second_cluster)
+                alpha = 1 - first_variance / (first_variance + second_variance)
+                w[first_cluster] *= alpha  # weight 1
+                w[second_cluster] *= 1 - alpha  # weight 2
+        return w
+
+
+
+
+     
 
 
