@@ -14,6 +14,12 @@ class HRP(WeightAllocationModel):
         # Determine the historical data needed based on months_back parameter
         return date_from - pd.DateOffset(months=self.months_back)
 
+    def __str__(self):
+        return self.__class__.__name__
+
+    def __hash__(self):
+        return self.__class__.__name__.__hash__()
+
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         weights_list = []
 

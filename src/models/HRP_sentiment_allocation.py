@@ -18,6 +18,19 @@ class HRP_Sentiment(WeightAllocationModel):
         self.async_getter = async_getter
         self.sentiment_analyzer = SentimentAnalyzer()
 
+    def __str__(self):
+        if self.include_sentiment:
+            return f"HRP_WithSentiment"
+        else:
+            return f"HRP_NoSentiment"
+
+    def __hash__(self):
+        if self.include_sentiment:
+            return f"HRP_WithSentiment".__hash__()
+        else:
+            return f"HRP_NoSentiment_NoSentiment".__hash__()
+
+
     def date_data_needed(self, date_from, date_to):
         return date_from - pd.DateOffset(months=self.months_back)
 

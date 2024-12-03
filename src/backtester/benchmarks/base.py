@@ -1,8 +1,9 @@
 from typing import List
-
 from deepdiff import DeepHash
 import pandas as pd
 from typing import List
+import yfinance as yf
+import datetime as dt
 
 
 class Benchmark:
@@ -11,13 +12,15 @@ class Benchmark:
         self.name = name
         self.freq = freq
         self.starting_capital = starting_capital
+        self.market_data = None
 
-    def calculate(self, weight_predictions: pd.DataFrame, ticker_list: List, data: pd.DataFrame, **kwargs):
+    def calculate(self, weight_predictions: pd.DataFrame, ticker_list: List, data: pd.DataFrame, market_data: pd.DataFrame, **kwargs):
 
         """
         :param ticker_list:
         :param weight_predictions: the predictions/weights from the Agent
         :param data: the whole period data from the backtester.
+        :param market_data : sp500/our chosen's overall market data.
         :return: case1) when we output 1 value-> a pd.Series for singular values with self.name as index, column name unnamed-dontcare (eg.in case we choose 'P' as frequency)
                  case2) when we want to output more than 1 value -> a pd.Dataframe or pd.Series with the correct indexing based on the groupby_freq staticmethod
         """
@@ -26,6 +29,7 @@ class Benchmark:
     def __hash__(self):
         return DeepHash(self)[self]
 
+    #works with DatetimeIndex only
     @staticmethod
     def groupby_freq(dataframe, freq):
         if freq == 'D':
@@ -54,6 +58,9 @@ class Benchmark:
             else:
                 return pd.DataFrame({name: [data]}, index=['period'])
         return data
+
+
+
 
 
 

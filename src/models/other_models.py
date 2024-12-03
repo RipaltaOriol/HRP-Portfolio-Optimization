@@ -16,6 +16,12 @@ class EqualWeights(WeightAllocationModel):
 
         return date_from
 
+    def __str__(self):
+        return self.__class__.__name__
+
+    def __hash__(self):
+        return self.__class__.__name__.__hash__()
+
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         """
         Allocates equal weights to all tickers for the specified date range.
@@ -52,6 +58,12 @@ class MarketCapWeights(WeightAllocationModel):
     def date_data_needed(self, date_from, date_to):
 
         return date_from
+
+    def __str__(self):
+        return self.__class__.__name__
+
+    def __hash__(self):
+        return self.__class__.__name__.__hash__()
 
     async def calculate_market_cap(self, date, ticker_list):
         """
