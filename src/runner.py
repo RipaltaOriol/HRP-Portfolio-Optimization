@@ -11,9 +11,10 @@ from ticker_codes import tickers
 # make sure to pip install -r requirements.txt
 
 start_date = date(2024, 1, 1)
-end_date = date(2024, 3, 29)
+end_date = date(2024, 10, 29)
 
-benchmarks = [b.PNL('P'),b.Sharpe('P'), b.PNL('YM'), b.Sharpe('YM')]
+benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
+              b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]
 
 # agents = []
 # months_back determines the amount of data used to make any prediction/weights_allocations
@@ -22,7 +23,9 @@ agents = [Agent(MarketCapWeights()), Agent(HRP_Sentiment(months_back=3, include_
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,
                          ticker_list= tickers,
-                         benchmarks=benchmarks)
+                         benchmarks=benchmarks,
+                         market_tickers= ['^GSPC','^IRX'] # sp500, 3month rolling yields
+                         )
 
 # Add the agents to the backcaster one by one.
 for agent in agents:
