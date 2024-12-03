@@ -6,7 +6,6 @@ import scipy.cluster.hierarchy as sch
 from scipy.spatial.distance import squareform
 from .RelationalStatistics import RelationalStatistics
 from typing import List
-import riskfolio as rp
 
 
 class HRP_Calculator:
