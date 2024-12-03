@@ -4,8 +4,10 @@ import pandas as pd
 from scipy.cluster.hierarchy import dendrogram, linkage
 import scipy.cluster.hierarchy as sch
 from scipy.spatial.distance import squareform
-from .RelationalStatistics import RelationalStatistics
+from src.models.RelationalStatistics import RelationalStatistics
 from typing import List
+from src.utils.DataProvider import DataProvider
+from src.models.HRP_new import HRPOptimizer
 
 
 class HRP_Calculator:
@@ -105,14 +107,17 @@ class HRP_Calculator:
         from the covariance matrix for the assets in the cluster.
         """
         # If the cluster contains sub-clusters, recursively calculate the variance
-        if isinstance(cluster, list):
-            # For numpy arrays, we use numpy indexing to select the relevant sub-matrix
-            cluster_cov = cov_matrix[np.ix_(cluster, cluster)]
-            # Sum the diagonal to get the variance
-            return np.sum(np.diagonal(cluster_cov))
-        else:
-            # If it's just a single asset, return its variance
-            return cov_matrix[cluster, cluster]
+
+        # For numpy arrays, we use numpy indexing to select the relevant sub-matrix
+        cluster_cov = cov_matrix[np.ix_(cluster, cluster)]
+        # Sum the diagonal to get the variance
+        weights = 1 / np.diag(cluster_cov)
+
+        weights /= weights.sum()
+
+        # Compute the variance
+        return weights @ cluster_cov @ weights
+
 
     def weights_allocate(self):
         # Initialize required variables
@@ -121,6 +126,8 @@ class HRP_Calculator:
         q_diag = self.quasi_diagonalization()
         cluster_order = self.get_cluster_pairs()
         weights = np.ones(len(stock_order))  # Initialize weights with 1 for all assets
+        cov_matrix = self.stats_module.calc_covariance_matrix()
+        print(cov_matrix)
 
         def allocate_recursive(cluster_order, weights):
             # Iterate through cluster pairs in reversed order
@@ -132,8 +139,8 @@ class HRP_Calculator:
                 if isinstance(left_cluster[0], list):  # Left cluster has sub-clusters
                     allocate_recursive(left_cluster, weights)
                 else:  # Left cluster is a leaf node (individual assets)
-                    left_variance = self.calculate_cluster_variance(left_cluster, q_diag)
-                    right_variance = self.calculate_cluster_variance(right_cluster, q_diag)
+                    left_variance = self.calculate_cluster_variance(left_cluster, cov_matrix)
+                    right_variance = self.calculate_cluster_variance(right_cluster, cov_matrix)
 
                     total_variance = left_variance + right_variance
                     alpha1 = 1 - (left_variance / total_variance)
@@ -372,11 +379,38 @@ class HRP_Calculator_3:
         return hrp_weights.sort_index()
 
 # Usage Example
-# if __name__ == "__main__":
+#if __name__ == "__main__":
+    import datetime
+
+    # Fetch data
+#    tickers = [
+#        "^FTSE",
+#        "SPY", "GOLD", "^GDAXI", "^RUT", "AAPL",
+    #        "BAC",
+    #       "NVDA",
+    #       "MSTR",
+    #      "BA",
+    #      "FLUT",
+    #      "TSM",
+    #      "JPM",
+    #      "^N225"
+#   ]
+#    start = datetime.datetime(2003, 1, 1)
+#    end = datetime.datetime(2023, 12, 31)
+#
+#    data_provider = DataProvider(start, end, tickers)
+#    data = data_provider.provide()
+ #   data.head()
+
+    #hrp = HRP_Calculator(data)
+    #weights = hrp.weights_allocate()
+    #print(weights)
+
 #     # Mock data
 #     np.random.seed(42)
 #     data = pd.DataFrame(np.random.randn(100, 5), columns=["A", "B", "C", "D", "E"])
 #     hrp = HRP_Calculator(data)
 #     weights = hrp.weights_allocate()
 #     print(weights)
+
 
