@@ -17,6 +17,7 @@ class MarketCapFetcher:
 
         return: date if it is a valid trading day or next available trading day.
         """
+        k=0
         while True:
             url = f'https://api.polygon.io/v1/open-close/AAPL/{date.strftime("%Y-%m-%d")}'
             params = {"apiKey": self.polygon_api_key}
@@ -34,7 +35,9 @@ class MarketCapFetcher:
             except requests.exceptions.RequestException as e:
                 print(f"Error checking trading day: {e}")
                 date += datetime.timedelta(days=1)
-
+                k=k+1
+                if k>3:
+                    break
 
     async def fetch_price_data_async(self, session: aiohttp.ClientSession, ticker, date):
         """

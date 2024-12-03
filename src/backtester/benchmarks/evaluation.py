@@ -117,7 +117,7 @@ class CAPM_Adjusted_Portfolio(Benchmark):
         riskfree_rates = market_data[['^IRX']]/252
         market = market_data[['^GSPC']]
 
-        self.beta = Beta('M').calculate(weight_predictions, ticker_list, data, market)
+        self.beta = Beta('YM').calculate(weight_predictions, ticker_list, data, market)
         self.beta.index = pd.to_datetime(data.index.to_period('M').unique().to_timestamp())
         self.beta = self.beta.reindex(data.index, method='ffill')
 
