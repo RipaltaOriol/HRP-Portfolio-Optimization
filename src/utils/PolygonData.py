@@ -3,7 +3,7 @@ import asyncio
 import pandas as pd
 import requests
 import datetime
-from utils import polygon_api_key
+from ticker_codes import polygon_api_key
 
 
 class MarketCapFetcher:
