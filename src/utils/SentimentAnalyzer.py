@@ -29,7 +29,7 @@ class SentimentAnalyzer:
         params = {'ticker': ticker,
                   'published_utc.gte': start_date.strftime('%Y-%m-%d'),
                   'published_utc.lte': end_date.strftime('%Y-%m-%d'),
-                  'limit': 75,
+                  'limit': 5,
                   'sort': 'published_utc',
                   'apiKey': self.api_key}
 
@@ -54,7 +54,7 @@ class SentimentAnalyzer:
         params = {'ticker': ticker,
                   'published_utc.gte': start_date.strftime('%Y-%m-%d'),
                   'published_utc.lte': end_date.strftime('%Y-%m-%d'),
-                  'limit': 100,
+                  'limit': 5,
                   'sort': 'published_utc',
                   'apiKey': self.api_key}
 

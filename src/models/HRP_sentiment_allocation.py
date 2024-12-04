@@ -46,7 +46,7 @@ class HRP_Sentiment(WeightAllocationModel):
             if past_data.empty or len(past_data) < 2:
                 continue
 
-            hrp_calculator = HRP_Calculator_3(past_data)
+            hrp_calculator = HRP_Calculator(past_data)
             hrp_weights = hrp_calculator.weights_allocate()
 
 

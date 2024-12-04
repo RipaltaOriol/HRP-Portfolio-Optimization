@@ -36,17 +36,34 @@ class Sharpe(Benchmark):
         self.risk_free_rate = risk_free_rate
 
     def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
+        riskfree_rates = market_data[['^IRX']] / 252
 
+        # Calculate portfolio returns
         portfolio_returns = (weight_predictions * data).sum(axis=1)
 
-        excess_returns = portfolio_returns - self.risk_free_rate
-        grouped_returns = self.groupby_freq(excess_returns, self.freq)
-        mean = grouped_returns.mean()
-        std = grouped_returns.std()
-        sharpe_ratio = mean / std
+        # Compute excess returns by subtracting the risk-free rate
+        excess_returns = portfolio_returns - riskfree_rates.values.flatten()
 
-        sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio, self.freq, self.name)
-        #sharpe_ratio_df = sharpe_ratio_df.replace([float('inf'), float('-inf')], 0).fillna(0)
+        # Group excess returns by the specified frequency
+        grouped_excess_returns = self.groupby_freq(excess_returns, self.freq)
+
+        if self.freq == "P":
+            excess_total_return = (1 + grouped_excess_returns).cumprod() - 1
+            sharpe_ratio = excess_total_return[-1] / (grouped_excess_returns.std()*np.sqrt(len(grouped_excess_returns)))
+            sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio, self.freq, self.name)
+        else:
+
+            sharpe_ratio = grouped_excess_returns.apply(
+                lambda x: x.sum() / (x.std()*np.sqrt(len(grouped_excess_returns))) if x.std() != 0 else 0
+            )
+            sharpe_ratio_df = sharpe_ratio.to_frame(name=self.name)
+
+        # Convert Sharpe Ratio to a DataFrame for proper indexing
+
+        sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio_df, self.freq, self.name)
+
+        # Replace infinities and NaNs with 0
+        sharpe_ratio_df = sharpe_ratio_df.replace([float('inf'), float('-inf')], 0).fillna(0)
 
         return sharpe_ratio_df
 
