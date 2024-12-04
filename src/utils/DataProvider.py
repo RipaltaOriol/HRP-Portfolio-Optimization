@@ -21,7 +21,7 @@ class DataProvider:
         Returns pd.DataFrame with ticker returns for the class date range.
         """
         self.fetch()
-        # self.clean()
+        self.clean()
         self.calc_returns()
         return self.data[1:]
 
