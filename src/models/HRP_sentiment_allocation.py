@@ -8,6 +8,9 @@ import matplotlib.pyplot as plt
 from models import plot_hrp_weights
 from models import SentimentAnalyzer
 import asyncio
+import os
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 
 class HRP_Sentiment(WeightAllocationModel):

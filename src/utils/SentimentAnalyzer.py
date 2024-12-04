@@ -7,6 +7,9 @@ from urllib3.util.retry import Retry
 import aiohttp
 import asyncio
 from aiohttp import ClientSession
+import os
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 
 class SentimentAnalyzer:
