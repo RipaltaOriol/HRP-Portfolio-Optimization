@@ -48,7 +48,7 @@ class HRP(WeightAllocationModel):
             weights_df =  weights_df[data.columns]
             weights_list.append(weights_df)
 
-            plot_hrp_weights(hrp_weights, len(weights_list))
+            # plot_hrp_weights(hrp_weights, len(weights_list))
 
         # Concatenate all weights and sort by index (date)
         weight_predictions = pd.concat(weights_list)

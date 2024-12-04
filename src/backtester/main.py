@@ -49,6 +49,10 @@ class Backtester:
             self.data = data_provider.provide()
             self.market = market_provider.provide()
 
+            print("DAATTTAAA")
+            print(self.data)
+            print(self.data.isnull().values.any())
+
             if self.tickers != self.data.columns.to_list():
                 self.tickers = self.data.columns.values
                 print('Tickers succesfully set to data_columns, because tickers didnt match data.columns. Check data')
