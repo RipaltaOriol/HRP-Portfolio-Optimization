@@ -9,15 +9,16 @@ from ticker_codes import tickers
 
 # make sure to pip install -r requirements.txt
 
-start_date = date(2020, 1, 4)
-end_date = date(2024, 10, 29)
+start_date = date(2024, 1, 4)
+end_date = date(2024, 3, 29)
 
 benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
               b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]
 
 # agents = []
 # months_back determines the amount of data used to make any prediction/weights_allocations
-agents = [Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True)),
+agents = [
+    Agent(HRP_Sentiment(months_back=3, include_sentiment=True, async_getter=True)),
           Agent(EqualWeights())]
 
 back_tester = Backtester(start_date=start_date,

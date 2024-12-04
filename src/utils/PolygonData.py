@@ -23,7 +23,7 @@ class MarketCapFetcher:
             params = {"apiKey": self.polygon_api_key}
 
             try:
-                response = requests.get(url, params=params, timeout=5)
+                response = requests.get(url, params=params, timeout=30)
                 response.raise_for_status()
                 result = response.json()
 
@@ -47,7 +47,7 @@ class MarketCapFetcher:
         params = {"apiKey": self.polygon_api_key}
 
         try:
-            async with session.get(url, params=params, timeout=5) as response:
+            async with session.get(url, params=params, timeout=30) as response:
                 response.raise_for_status()
                 json_response = await response.json()
                 if "close" in json_response:
@@ -67,7 +67,7 @@ class MarketCapFetcher:
         params = {"apiKey": self.polygon_api_key}
 
         try:
-            async with session.get(url, params=params, timeout=5) as response:
+            async with session.get(url, params=params, timeout=30) as response:
                 response.raise_for_status()
                 json_response = await response.json()
                 if "results" in json_response and "share_class_shares_outstanding" in json_response["results"]:

@@ -39,7 +39,7 @@ class SentimentAnalyzer:
         session.mount("https://", adapter)
 
         try:
-            response = session.get(url, params=params, timeout=5)
+            response = session.get(url, params=params, timeout=20)
             response.raise_for_status()
             return response.json().get('results', [])
         except requests.exceptions.RequestException as e:
@@ -59,7 +59,7 @@ class SentimentAnalyzer:
                   'apiKey': self.api_key}
 
         try:
-            async with session.get(url, params=params, timeout=5) as response:
+            async with session.get(url, params=params, timeout=20) as response:
                 response.raise_for_status()
                 json_response = await response.json()
                 return json_response.get('results', [])
