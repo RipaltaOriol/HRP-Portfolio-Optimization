@@ -105,14 +105,12 @@ class HRP_Calculator:
         from the covariance matrix for the assets in the cluster.
         """
         # If the cluster contains sub-clusters, recursively calculate the variance
-        if isinstance(cluster, list):
-            # For numpy arrays, we use numpy indexing to select the relevant sub-matrix
-            cluster_cov = cov_matrix[np.ix_(cluster, cluster)]
-            # Sum the diagonal to get the variance
-            return np.sum(np.diagonal(cluster_cov))
-        else:
-            # If it's just a single asset, return its variance
-            return cov_matrix[cluster, cluster]
+        cluster_cov = cov_matrix[np.ix_(cluster, cluster)]
+
+        # Sum the diagonal elements to compute total variance
+        total_variance = np.sum(np.diag(cluster_cov))
+
+        return total_variance
 
     def weights_allocate(self):
         # Initialize required variables
