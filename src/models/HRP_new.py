@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import scipy.cluster.hierarchy as sch
 from scipy.cluster.hierarchy import linkage
-from src.models.RelationalStatistics import RelationalStatistics
+from models.RelationalStatistics import RelationalStatistics
 from scipy.spatial.distance import pdist
 import scipy.spatial.distance as ssd
 
@@ -36,7 +36,7 @@ class HRPOptimizer:
 
         # Initialize the returns, covariance matrix, and statistics module
         self.returns = returns
-        self.cov_matrix = cov_matrix
+        self.cov_matrix = RelationalStatistics(returns).calc_shrinkage_covariance
         self.stats_module = RelationalStatistics(returns)
         
         # Check if returns or cov_matrix is provided

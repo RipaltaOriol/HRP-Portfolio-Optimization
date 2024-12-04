@@ -21,7 +21,7 @@ class DataProvider:
         Returns pd.DataFrame with ticker returns for the class date range.
         """
         self.fetch()
-        #self.clean()
+        self.clean()
         self.calc_returns()
         return self.data[1:]
 
@@ -34,7 +34,7 @@ class DataProvider:
 
         return self.data
 
-    def clean(self, brute=True) -> None:
+    def clean(self, brute = True) -> None:
         """
         Clean up the data
         """
@@ -42,7 +42,8 @@ class DataProvider:
             print("The dataset contains null or empty values")
             print("Pefroming cleaning")
             if brute:
-                self.data = self.data.dropna()
+                print("Here")
+                self.data = self.data.dropna(axis = 1)
             else:  # TODO: the code below has not been tested
                 missing_fractions = self.data.isnull().mean().sort_values(ascending=False)
                 missing_fractions.head(10)

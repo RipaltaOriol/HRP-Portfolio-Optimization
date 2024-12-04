@@ -5,6 +5,9 @@ import datetime
 from models import MarketCapFetcher
 import aiohttp
 import asyncio
+import os
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 
 class EqualWeights(WeightAllocationModel):
@@ -15,6 +18,12 @@ class EqualWeights(WeightAllocationModel):
     def date_data_needed(self, date_from, date_to):
 
         return date_from
+
+    def __str__(self):
+        return self.__class__.__name__
+
+    def __hash__(self):
+        return self.__class__.__name__.__hash__()
 
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         """
@@ -53,6 +62,12 @@ class MarketCapWeights(WeightAllocationModel):
 
         return date_from
 
+    def __str__(self):
+        return self.__class__.__name__
+
+    def __hash__(self):
+        return self.__class__.__name__.__hash__()
+
     async def calculate_market_cap(self, date, ticker_list):
         """
         Calculate market capitalization asynchronously for multiple tickers on a specific date.
@@ -67,7 +82,7 @@ class MarketCapWeights(WeightAllocationModel):
 
         trading_day = self.MarketCapFetcher.get_next_trading_day(date)
 
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             tasks = [self.MarketCapFetcher.fetch_market_cap_for_ticker(session, ticker, trading_day) for ticker in ticker_list]
             results = await asyncio.gather(*tasks)
 

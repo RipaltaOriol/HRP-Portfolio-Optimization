@@ -8,15 +8,31 @@ import matplotlib.pyplot as plt
 from models import plot_hrp_weights
 from models import SentimentAnalyzer
 import asyncio
+import os
+import certifi
+os.environ['SSL_CERT_FILE'] = certifi.where()
 
 
 class HRP_Sentiment(WeightAllocationModel):
-    def __init__(self, months_back=3, include_sentiment=False, async_getter=True):
+    def __init__(self, months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = True):
         super(HRP_Sentiment, self).__init__()
         self.months_back = months_back
         self.include_sentiment = include_sentiment
         self.async_getter = async_getter
         self.sentiment_analyzer = SentimentAnalyzer()
+        self.is_shrinkage = is_shrinkage
+
+    def __str__(self):
+        if self.include_sentiment:
+            return f"HRP_WithSentiment"
+        else:
+            return f"HRP_NoSentiment"
+
+    def __hash__(self):
+        if self.include_sentiment:
+            return f"HRP_WithSentiment".__hash__()
+        else:
+            return f"HRP_NoSentiment_NoSentiment".__hash__()
 
     def date_data_needed(self, date_from, date_to):
         return date_from - pd.DateOffset(months=self.months_back)
@@ -33,7 +49,7 @@ class HRP_Sentiment(WeightAllocationModel):
             if past_data.empty or len(past_data) < 2:
                 continue
 
-            hrp_calculator = HRP_Calculator_3(past_data)
+            hrp_calculator = HRP_Calculator(past_data, self.is_shrinkage)
             hrp_weights = hrp_calculator.weights_allocate()
 
 
@@ -51,7 +67,7 @@ class HRP_Sentiment(WeightAllocationModel):
 
             weights_list.append(weights_df)
 
-            plot_hrp_weights(hrp_weights, len(weights_list))
+            plot_hrp_weights(weights_df.T.squeeze(), len(weights_list))
 
         weight_predictions = pd.concat(weights_list)
         weight_predictions = weight_predictions.sort_index()
@@ -70,7 +86,7 @@ class HRP_Sentiment(WeightAllocationModel):
         if linear_adjustment:
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
         else:
-            k = 1.75  # You can adjust k to control the impact of sentiment
+            k = 2.5  # You can adjust k to control the impact of sentiment
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * np.exp(k * aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
 
         # normalize adjusted weights to sum to 1

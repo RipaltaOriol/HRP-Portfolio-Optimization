@@ -7,14 +7,16 @@ from backtester import WeightAllocationModel
 
 class Backtester:
 
-    def __init__(self,start_date, end_date, ticker_list, benchmarks, save=False):
+    def __init__(self,start_date, end_date, ticker_list, benchmarks, market_tickers, save=False):
         self.start_date = start_date
         self.end_date = end_date
         self.tickers = sorted(ticker_list)
+        self.market_tickers = market_tickers
         self.benchmarks = benchmarks
 
         self.data_from = None
         self.data = None
+        self.market = None
 
         self.agents = []
         self.new_agents = []
@@ -40,8 +42,16 @@ class Backtester:
 
         if self.new_agents:
             self.data_from = self.data_date_from()
+
             data_provider = DataProvider(self.data_from, self.end_date, self.tickers)
+            market_provider = DataProvider(self.data_from, self.end_date, self.market_tickers)
+
             self.data = data_provider.provide()
+            self.market = market_provider.provide()
+
+            print("DAATTTAAA")
+            print(self.data)
+            print(self.data.isnull().values.any())
 
             if self.tickers != self.data.columns.to_list():
                 self.tickers = self.data.columns.values
@@ -49,6 +59,7 @@ class Backtester:
 
             if self.data_from is None:
                 raise ValueError("You have to provide agents for evaluations")
+
 
     def add_agent(self, agent: Agent):
         """
@@ -110,10 +121,12 @@ class Backtester:
         }
 
         self.data = self.data[(self.data.index.date >= self.start_date) & (self.data.index.date <= self.end_date)]
+        self.market = self.market[(self.market.index.date >= self.start_date) & (self.market.index.date <= self.end_date)]
+
         for agent in self.agents:
             self.results[agent.sheet_name()] = copy.deepcopy(results)
             for benchmark in benchmarks:
-                benchmark_result = benchmark.calculate(agent.weight_predictions, self.tickers, self.data)
+                benchmark_result = benchmark.calculate(agent.weight_predictions, self.tickers, self.data, self.market)
                 self.results[agent.sheet_name()][benchmark.freq][benchmark.name] = benchmark_result
         return self.results
 
