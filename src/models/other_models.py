@@ -79,7 +79,7 @@ class MarketCapWeights(WeightAllocationModel):
 
         trading_day = self.MarketCapFetcher.get_next_trading_day(date)
 
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             tasks = [self.MarketCapFetcher.fetch_market_cap_for_ticker(session, ticker, trading_day) for ticker in ticker_list]
             results = await asyncio.gather(*tasks)
 
