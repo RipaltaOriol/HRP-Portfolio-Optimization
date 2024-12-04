@@ -17,8 +17,7 @@ benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfol
 
 # agents = []
 # months_back determines the amount of data used to make any prediction/weights_allocations
-agents = [Agent(MarketCapWeights()),
-          Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True)),
+agents = [Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True)),
           Agent(EqualWeights())]
 
 back_tester = Backtester(start_date=start_date,

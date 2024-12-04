@@ -174,8 +174,8 @@ class InformationRatio(Benchmark):
         grouped_excess_returns = self.groupby_freq(excess_returns, self.freq)
 
         def ir_for_group(group):
-            active_return = group.mean()
-            tracking_error = group.std()
+            active_return = (1 + group).cumprod()[-1] - 1
+            tracking_error = group.std() * np.sqrt(len(group))
             return active_return / tracking_error if tracking_error != 0 else 0
 
         ir_values = {}
