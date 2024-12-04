@@ -141,10 +141,10 @@ class HRP_Calculator:
 
                     # Update the weights for assets in the left and right clusters
                     for asset in left_cluster:
-                        weights[asset] *= alpha1  # Update weight for asset in left cluster
+                        weights[asset] *= alpha2  # Update weight for asset in left cluster
 
                     for asset in right_cluster:
-                        weights[asset] *= alpha2  # Update weight for asset in right cluster
+                        weights[asset] *= alpha1  # Update weight for asset in right cluster
 
             return weights
 

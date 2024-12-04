@@ -5,7 +5,7 @@ import scipy.cluster.hierarchy as sch
 from scipy.cluster.hierarchy import linkage
 from src.models.RelationalStatistics import RelationalStatistics
 from scipy.spatial.distance import pdist
-
+import scipy.spatial.distance as ssd
 
 class HRPOptimizer:
     """
@@ -69,7 +69,6 @@ class HRPOptimizer:
         float
         returns the variance.
         """
-        # Compute the cluster covariance matrix
         cluster_cov = covariance_matrix.loc[cluster_items, cluster_items]
 
         # Compute the inverse of the weights
@@ -102,7 +101,7 @@ class HRPOptimizer:
 
         # Compute linkage matrix
         linkage_matrix = linkage(pdistance, 'single')
-
+        print(linkage_matrix)
         # Sort clustered items by eucledian distance
         return sch.to_tree(linkage_matrix, rd=False).pre_order()
     
@@ -158,13 +157,11 @@ class HRPOptimizer:
                 w[second_cluster] *= 1 - alpha  # weight 2
         return w
     
-    def optimize(self, linkage_method = 'single') -> pd.DataFrame:
+    def optimize(self, linkage_method: str = 'single') -> pd.DataFrame:
 
         """
-        Compute the weights of the HRP portfolio. It does so through various steps.
-        The first is recursive bisection, which clusters assets into a hierarchical tree.
-        The algorithm will then run the cluster_variance function to compute the variance per cluster.
-        This will allow the algorithm to optimize based on variance.
+        This function will return the weights of the hrp portfolio. It will
+        automatically run every previous function in the correct order to achieve this.
         
         
         Parameters
@@ -179,8 +176,33 @@ class HRPOptimizer:
         float
         returns the weights of the HRP portfolio.
         """
-
         
+        # Ensure covariance matrix is converted to correlation matrix
+        cov = self.cov_matrix
+        corr = cov / np.sqrt(np.outer(np.diag(cov), np.diag(cov)))
+        np.fill_diagonal(corr, 1.0)  # Ensure diagonals are 1
+
+        # Compute the distance matrix
+        distance_matrix = pdist(corr, metric="euclidean")
+
+        # Perform hierarchical clustering
+        link = linkage(distance_matrix, method=linkage_method)
+
+        # Perform quasi-diagonalization
+        quasi_diag = self.quasi_diagonalization(link)
+
+        # Order tickers based on clustering
+        ordered_tickers = corr.columns[quasi_diag]
+
+        # Compute HRP weights
+        weights = self.raw_hrp_allocation(cov, ordered_tickers)
+
+        return weights
+
+
+
+
+
 
 
 
