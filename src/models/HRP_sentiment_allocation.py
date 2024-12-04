@@ -31,7 +31,6 @@ class HRP_Sentiment(WeightAllocationModel):
         else:
             return f"HRP_NoSentiment_NoSentiment".__hash__()
 
-
     def date_data_needed(self, date_from, date_to):
         return date_from - pd.DateOffset(months=self.months_back)
 
@@ -65,7 +64,7 @@ class HRP_Sentiment(WeightAllocationModel):
 
             weights_list.append(weights_df)
 
-            # plot_hrp_weights(hrp_weights, len(weights_list))
+            plot_hrp_weights(weights_df.T.squeeze(), len(weights_list))
 
         weight_predictions = pd.concat(weights_list)
         weight_predictions = weight_predictions.sort_index()
@@ -84,7 +83,7 @@ class HRP_Sentiment(WeightAllocationModel):
         if linear_adjustment:
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
         else:
-            k = 1.75  # You can adjust k to control the impact of sentiment
+            k = 2.5  # You can adjust k to control the impact of sentiment
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * np.exp(k * aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
 
         # normalize adjusted weights to sum to 1
