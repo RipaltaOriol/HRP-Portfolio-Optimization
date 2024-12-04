@@ -13,13 +13,14 @@ class HRP_Calculator:
     Portfolio optimization using Hierarchical Risk Parity (HRP)
     """
 
-    def __init__(self, data):
+    def __init__(self, data, use_shrinkage = True):
         """
         pd.DataFrame data: data of ticker returns
         class RelationalStatistics: module for relational statistics
         """
         self.data = data
         self.stats_module = RelationalStatistics(data)
+        self.use_shrinkage = use_shrinkage
 
     def hierarchical_clustering(self) -> np.ndarray:
         """
@@ -90,7 +91,8 @@ class HRP_Calculator:
 
         # ensure cluster_order is a 1D array, otherwise flatten
         cluster_order = np.ravel(cluster_order)
-        cov_matrix = self.stats_module.calc_covariance_matrix()
+
+        cov_matrix = self.stats_module.calc_shrinkage_covariance() if self.use_shrinkage else self.stats_module.calc_covariance_matrix()
 
         if isinstance(cov_matrix, pd.DataFrame):  # ensure cov matrix is a pd.DataFrame
             reordered_matrix = cov_matrix.iloc[cluster_order, cluster_order].values

@@ -14,12 +14,13 @@ os.environ['SSL_CERT_FILE'] = certifi.where()
 
 
 class HRP_Sentiment(WeightAllocationModel):
-    def __init__(self, months_back=3, include_sentiment=False, async_getter=True):
+    def __init__(self, months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = True):
         super(HRP_Sentiment, self).__init__()
         self.months_back = months_back
         self.include_sentiment = include_sentiment
         self.async_getter = async_getter
         self.sentiment_analyzer = SentimentAnalyzer()
+        self.is_shrinkage = is_shrinkage
 
     def __str__(self):
         if self.include_sentiment:
@@ -48,7 +49,7 @@ class HRP_Sentiment(WeightAllocationModel):
             if past_data.empty or len(past_data) < 2:
                 continue
 
-            hrp_calculator = HRP_Calculator(past_data)
+            hrp_calculator = HRP_Calculator(past_data, self.is_shrinkage)
             hrp_weights = hrp_calculator.weights_allocate()
 
 

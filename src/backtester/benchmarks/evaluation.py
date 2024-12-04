@@ -48,13 +48,13 @@ class Sharpe(Benchmark):
         grouped_excess_returns = self.groupby_freq(excess_returns, self.freq)
 
         if self.freq == "P":
-            excess_total_return = (1 + grouped_excess_returns).cumprod() - 1
-            sharpe_ratio = excess_total_return[-1] / (grouped_excess_returns.std()*np.sqrt(len(grouped_excess_returns)))
+            excess_mean_return = (grouped_excess_returns.mean())
+            sharpe_ratio = excess_mean_return / grouped_excess_returns.std()
             sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio, self.freq, self.name)
         else:
 
             sharpe_ratio = grouped_excess_returns.apply(
-                lambda x: x.sum() / (x.std()*np.sqrt(len(grouped_excess_returns))) if x.std() != 0 else 0
+                lambda x: (x.mean() / x.std()) if x.std() != 0 else 0
             )
             sharpe_ratio_df = sharpe_ratio.to_frame(name=self.name)
 
