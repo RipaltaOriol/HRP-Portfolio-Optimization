@@ -58,20 +58,25 @@ class SentimentAnalyzer:
                   'sort': 'published_utc',
                   'apiKey': self.api_key}
 
-        try:
-            async with session.get(url, params=params, timeout=20) as response:
-                response.raise_for_status()
-                json_response = await response.json()
-                return json_response.get('results', [])
-        except aiohttp.ClientError as e:
-            print(f"Error fetching news for {ticker}: {e}")
-            return []
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                async with session.get(url, params=params, timeout=15) as response:
+                    response.raise_for_status()
+                    json_response = await response.json()
+                    return json_response.get('results', [])
+            except aiohttp.ClientError as e:
+                print(f"Attempt {attempt + 1}/{max_retries}: Error fetching news for {ticker}: {e}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(4)
+                else:
+                    return []
 
     async def fetch_all_ticker_news(self, start_date, end_date, ticker_list):
         """
         Fetch news for all tickers asynchronously.
         """
-        async with aiohttp.ClientSession() as session:
+        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=False)) as session:
             tasks = [self.fetch_ticker_news_async(session, start_date, end_date, ticker) for ticker in ticker_list]
             return await asyncio.gather(*tasks)
 
