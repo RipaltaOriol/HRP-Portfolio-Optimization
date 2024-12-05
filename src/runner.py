@@ -16,9 +16,9 @@ from utils.TickerSelector import TickerSelector
 start_date = date(2024, 1, 4)
 end_date = date(2024, 4, 29)
 
-selector = TickerSelector()
-returns =selector.calculate_ticker_returns(start_date, end_date)
-tickers_evi = selector.random_selection(returns)
+#selector = TickerSelector()
+#returns =selector.calculate_ticker_returns(start_date, end_date)
+#tickers_evi = selector.random_selection(returns)
 
 benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
               b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]

@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 from models import plot_hrp_weights
 from models import SentimentAnalyzer
 import asyncio
+from src.utils.helper_functions import plot_weights_3d
 import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
@@ -116,10 +117,12 @@ class HRP_Sentiment(WeightAllocationModel):
 
             weights_list.append(weights_df)
 
-            plot_hrp_weights(weights_df.T.squeeze(), len(weights_list))
+            #plot_hrp_weights(weights_df.T.squeeze(), len(weights_list))
 
         weight_predictions = pd.concat(weights_list)
         weight_predictions = weight_predictions.sort_index()
+
+        plot_weights_3d(weight_predictions)
 
         return weight_predictions
 
