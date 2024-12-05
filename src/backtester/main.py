@@ -49,6 +49,16 @@ class Backtester:
 
     def data_date_from(self):
 
+        """
+        This method is used to find the earliest date that the agents need data from.
+        
+        Parameters
+        ----------
+        None
+        ----------
+        Returns datetime of date_from
+        """
+
         date_from = self.start_date
         for agent in self.agents:
             temp = agent.date_data_needed(self.start_date, self.end_date)
@@ -58,6 +68,16 @@ class Backtester:
         return date_from
 
     def get_data(self):
+        """
+        This method is used to fetch the data from the data provider for the agents.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns None
+        """
+
 
         if self.new_agents:
             self.data_from = self.data_date_from()
@@ -83,7 +103,13 @@ class Backtester:
     def add_agent(self, agent: Agent):
         """
         Adds an agent to the simulation/
-        :param agent: Agent object to be used for simulation
+
+        Parameters
+        ----------
+        agent : Agent
+            Agent object to be used for simulation.
+        ----------
+        Returns None
         """
         self.agents.append(agent)
         self.new_agents.append(agent)
@@ -91,7 +117,12 @@ class Backtester:
     def remove_agent(self, agent):
         """
         Removes an already added agent from the simulation.
-        :param agent: Agent instance of the agent you want to be removed.
+        Paramters
+        ----------
+        agent : Agent
+            Agent object to be removed from the simulation.
+        ----------
+        Returns None
         """
         try:
             self.agents.remove(agent)
@@ -101,6 +132,12 @@ class Backtester:
     def clear_agents(self):
         """
         Deletes all agents from the simulation. Results will be still be available.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns None
         """
         self.agents = []
 
@@ -108,6 +145,12 @@ class Backtester:
     def agents_allocate(self):
         """
         In this method all agents, one by one, predict their backtests for the simulation period.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns None
         """
         for agent in self.new_agents:
             print(f"Predictions for {agent}, are being calculated.")
@@ -119,8 +162,13 @@ class Backtester:
         This is where the agents are evaluated based on specified benchmarks. Returns a dictionary that has as keys,
         the frequencies of the benchmarks, e.g. "D" for daily benchmarks, "W" for weekly etc. and as values the
         DataFrames of the specified frequencies with all the benchmarks associated with them.
-        :param benchmarks: Benchmarks that the agents will be evaluated at.
-        :return: Dictionary with the specified format.
+
+        Parameters
+        ----------
+        benchmarks: List[Benchmark]
+            Benchmarks that the agents will be evaluated at.
+        ----------
+        return: Dictionary with the specified format.
         """
         try:
 
@@ -153,6 +201,12 @@ class Backtester:
         """
         Runs the simulation for all agents added. After the run has ended all agents have their predictions and
         quantities calculated.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns None
         """
         # Get data
         self.get_data()
@@ -163,7 +217,12 @@ class Backtester:
     def run_n_evaluate(self):
         """
         Runs the simulation and evaluate the agents. Returns the dictionary with the results.
-        :return: Dictionary with the specified format see evaluate_agents for details on format.
+
+        Parameters
+        ----------
+        None
+        ----------
+        return: Dictionary with the specified format see evaluate_agents for details on format.
         """
         # Run first
         self.run()
@@ -176,9 +235,15 @@ class Backtester:
     def results_to_excel2(self, filename: str, save_dir=".", disp=False):
         """
         Export the results of the simulation to an Excel file and display them in the console.
-        :param filename: Filename of the Excel file.
-        :param save_dir: Directory in which the file will be saved relative to the backtesting project.
-        :param disp: Boolean parameter to print results in the console.
+
+        Paramters
+        ----------
+        filename: str
+            Filename of the Excel file.
+        save_dir: str
+            Directory in which the file will be saved relative to the backtesting project.
+        disp: bool
+            Boolean parameter to print results in the console.
         """
         if not self.results:
             raise ValueError("Please run evaluate_agents first to generate the results.")
