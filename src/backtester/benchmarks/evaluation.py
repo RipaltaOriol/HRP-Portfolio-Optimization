@@ -39,32 +39,33 @@ class Sharpe(Benchmark):
         Report sharpe ratio for any period/frequence in an annualized basis
         
         """
+
     def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
+        # Risk-free rate calculation
         riskfree_rates = market_data[['^IRX']] / 252
 
+        # Portfolio returns calculation
         portfolio_returns = (weight_predictions * data).sum(axis=1)
 
+        # Excess returns calculation
         excess_returns = portfolio_returns - riskfree_rates.values.flatten()
 
-        # Group excess returns by the specified frequency
+        # Group excess returns and portfolio returns by the specified frequency
         grouped_excess_returns = self.groupby_freq(excess_returns, self.freq)
+        grouped_portfolio_returns = self.groupby_freq(portfolio_returns, self.freq)
 
         if self.freq == "P":
-            excess_mean_return = (grouped_excess_returns.mean())
-            sharpe_ratio = (excess_mean_return / grouped_excess_returns.std()) * np.sqrt(252)
-            sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio, self.freq, self.name)
+            excess_mean_return = grouped_excess_returns.mean()
+            portfolio_std = grouped_portfolio_returns.std()
+            sharpe_ratio_df = (excess_mean_return / portfolio_std) * np.sqrt(252)
         else:
+            # Apply calculation for each group
+            sharpe_ratio = grouped_excess_returns.apply(lambda x: (x.mean() / portfolio_returns.std()) * np.sqrt(252) if x.std() != 0 else 0)
 
-            sharpe_ratio = grouped_excess_returns.apply(
-                lambda x: (x.mean() / x.std())*np.sqrt(252) if x.std() != 0 else 0
-            )
             sharpe_ratio_df = sharpe_ratio.to_frame(name=self.name)
-
-        # Convert Sharpe Ratio to a DataFrame for proper indexing
 
         sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio_df, self.freq, self.name)
 
-        # Replace infinities and NaNs with 0
         sharpe_ratio_df = sharpe_ratio_df.replace([float('inf'), float('-inf')], 0).fillna(0)
 
         return sharpe_ratio_df
@@ -175,22 +176,14 @@ class InformationRatio(Benchmark):
         excess_returns =  returns['our_returns'] - market['market_returns']
         grouped_excess_returns = self.groupby_freq(excess_returns, self.freq)
 
-        def ir_for_group(group):
-            active_return = (1 + group).cumprod()[-1] - 1
-            tracking_error = group.std() * np.sqrt(len(group))
-            return active_return / tracking_error if tracking_error != 0 else 0
-
-        ir_values = {}
-        if self.freq != 'P':
-            for group_key in grouped_excess_returns.groups.keys():
-                excess_return_group = grouped_excess_returns.get_group(group_key)
-                ir = ir_for_group(excess_return_group)
-                ir_values[group_key] = ir
+        if self.freq == 'P':
+            information_ratio_df = ((grouped_excess_returns.mean()) / (grouped_excess_returns.std())) * np.sqrt(252)
         else:
-            ir_values['period'] = ir_for_group(grouped_excess_returns)
+            information_ratio = grouped_excess_returns.apply(
+                lambda x: (x.mean() / x.std()) *np.sqrt(252) if x.std() !=0 else 0)
 
-        # Calculate information ratio for each group
-            # Convert beta values to a DataFrame with grouping index
-        ir_df = pd.DataFrame.from_dict(ir_values, orient="index", columns=[self.name])
-        ir_df = self.to_frame_and_indexing(ir_df, self.freq, self.name)
-        return ir_df
+            information_ratio_df = information_ratio.to_frame(name=self.name)
+
+        information_ratio_df = self.to_frame_and_indexing(information_ratio_df, self.freq, self.name)
+
+        return information_ratio_df

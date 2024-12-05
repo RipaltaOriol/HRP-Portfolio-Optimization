@@ -12,6 +12,7 @@ from src.utils.helper_functions import plot_weights_3d
 import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
+from deepdiff import DeepHash
 
 
 class HRP_Sentiment(WeightAllocationModel):
@@ -43,15 +44,18 @@ class HRP_Sentiment(WeightAllocationModel):
 
     def __str__(self):
         if self.include_sentiment:
-            return f"HRP_WithSentiment"
+            if self.is_shrinkage:
+                return f"HRP_WithSentiment_withshrinkage"
+            else:
+                return f"HRP_WithSentiment"
         else:
-            return f"HRP_NoSentiment"
+            if self.is_shrinkage:
+                return f"HRP_withshrinkage"
+            else:
+                return f"HRP"
 
     def __hash__(self):
-        if self.include_sentiment:
-            return f"HRP_WithSentiment".__hash__()
-        else:
-            return f"HRP_NoSentiment_NoSentiment".__hash__()
+        return DeepHash(self)[self]
 
     def date_data_needed(self, date_from, date_to) -> datetime.date:
         """
