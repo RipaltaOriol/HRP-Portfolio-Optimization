@@ -52,7 +52,7 @@ class HRP_Sentiment(WeightAllocationModel):
         else:
             return f"HRP_NoSentiment_NoSentiment".__hash__()
 
-    def date_data_needed(self, date_from) -> datetime.date:
+    def date_data_needed(self, date_from, date_to) -> datetime.date:
         """
         
         Returns the date needed for the historical data.
