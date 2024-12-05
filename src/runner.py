@@ -32,7 +32,7 @@ agents = [Agent(MarketCapWeights()),
 
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,
-                         ticker_list= tickers_evi,
+                         ticker_list= tickers,
                          benchmarks=benchmarks,
                          market_tickers= ['^GSPC','^IRX'] # sp500, 3month rolling yields
                          )

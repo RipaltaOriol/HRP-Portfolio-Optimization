@@ -35,13 +35,15 @@ class Sharpe(Benchmark):
         super(Sharpe, self).__init__(name="Sharpe", freq=freq)
         self.risk_free_rate = risk_free_rate
 
+        """
+        Report sharpe ratio for any period/frequence in an annualized basis
+        
+        """
     def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
         riskfree_rates = market_data[['^IRX']] / 252
 
-        # Calculate portfolio returns
         portfolio_returns = (weight_predictions * data).sum(axis=1)
 
-        # Compute excess returns by subtracting the risk-free rate
         excess_returns = portfolio_returns - riskfree_rates.values.flatten()
 
         # Group excess returns by the specified frequency
@@ -49,12 +51,12 @@ class Sharpe(Benchmark):
 
         if self.freq == "P":
             excess_mean_return = (grouped_excess_returns.mean())
-            sharpe_ratio = excess_mean_return / grouped_excess_returns.std()
+            sharpe_ratio = (excess_mean_return / grouped_excess_returns.std()) * np.sqrt(252)
             sharpe_ratio_df = self.to_frame_and_indexing(sharpe_ratio, self.freq, self.name)
         else:
 
             sharpe_ratio = grouped_excess_returns.apply(
-                lambda x: (x.mean() / x.std()) if x.std() != 0 else 0
+                lambda x: (x.mean() / x.std())*np.sqrt(252) if x.std() != 0 else 0
             )
             sharpe_ratio_df = sharpe_ratio.to_frame(name=self.name)
 
