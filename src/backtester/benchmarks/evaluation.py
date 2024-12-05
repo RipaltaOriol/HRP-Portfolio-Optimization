@@ -18,6 +18,16 @@ class PNL(Benchmark):
         """
         EJ lecture: log(1+x) = x approximately, for small x. SO if we use cumsum() on returns we approximate the cumulative return
         more precisely: log(total_ret) = log((1+r1)*(1+r2)*...*(1_r_n)) = log(1+r1) + log(1+r2) + ... + log(1+r_n) = r1 + r2 + rn returns
+        Parameters
+        ----------
+        weight_predictions: pd.DataFrame
+            the predictions/weights from the Agent  
+        data: pd.DataFrame
+            the whole period data from the backtester.
+        freq: str
+            the frequency to group by.
+        ----------
+        Returns pd.DataFrame
         """
 
         portfolio_returns = (weight_predictions * data).sum(axis=1)
@@ -30,17 +40,44 @@ class PNL(Benchmark):
         return (grouped_pnl)
 
 class Sharpe(Benchmark):
+    """
+    Report sharpe ratio for any period/frequence in an annualized basis
+    
+    """
 
     def __init__(self, freq='D', risk_free_rate=0):
+
+        """
+        Constructor for the Sharpe ratio calculation.
+        
+        Parameters
+        ----------
+        freq: str
+            the frequency to group by.
+        risk_free_rate: float
+            the risk-free rate to use in the calculation.
+        ----------
+        Returns None
+        """
         super(Sharpe, self).__init__(name="Sharpe", freq=freq)
         self.risk_free_rate = risk_free_rate
 
+    def calculate(self, weight_predictions, data, market_data, **kwargs):
         """
-        Report sharpe ratio for any period/frequence in an annualized basis
-        
+        Calculate the Sharpe ratio of the portfolio.
+
+        Parameters
+        ----------
+        weight_predictions: pd.DataFrame
+            the predictions/weights from the Agent  
+        data: pd.DataFrame
+            the whole period data from the backtester.
+        freq: str
+            the frequency to group by.
+        ----------
+        Returns pd.DataFrame
         """
 
-    def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
         # Risk-free rate calculation
         riskfree_rates = market_data[['^IRX']] / 252
 
@@ -74,6 +111,19 @@ class Sharpe(Benchmark):
 class Beta(Benchmark):
 
     def __init__(self, freq='P'):
+
+        """
+        Constructor for the Beta calculation.
+        
+        Parameters
+        ----------
+        freq: str
+            the frequency to group by.
+            
+        ----------
+        Returns None
+        """
+
         super(Beta, self).__init__(name="Beta", freq=freq)
         self.sp500_returns = None
         if self.freq == 'D':
@@ -82,6 +132,19 @@ class Beta(Benchmark):
     def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
         """
         Calculate beta of the portfolio compared to the market benchmark.
+
+        Parameters
+        ----------
+        weight_predictions: pd.DataFrame
+            the predictions/weights from the Agent
+        ticker_list: List[str]
+            the list of tickers to fetch data for.
+        data: pd.DataFrame
+            the whole period data from the backtester.
+        freq: str
+            the frequency to group by.
+        ----------
+        Returns pd.DataFrame
         """
         #choose sp500 returns from market_data
         market = market_data[['^GSPC']]
@@ -124,6 +187,18 @@ class Beta(Benchmark):
 
 class CAPM_Adjusted_Portfolio(Benchmark):
     def __init__(self, freq='D', beta_model=0.5):
+        """
+        Constructor for the CAPM adjusted portfolio calculation.
+
+        Parameters
+        ----------
+        freq: str
+            the frequency to group by.
+        beta_model: float
+            the beta value to use in the calculation.
+        ----------
+        Returns None
+        """
         super(CAPM_Adjusted_Portfolio, self).__init__(name="CAPM_Adjusted_Portfolio", freq=freq)
         self.beta = None
         if self.freq == 'D' or self.freq == 'W':
@@ -132,6 +207,18 @@ class CAPM_Adjusted_Portfolio(Benchmark):
     def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
         """
         Calculate portfolio PnL and compare it to a benchmark of beta*SP500 + beta*Cash.
+
+        Parameters
+        ----------
+        weight_predictions: pd.DataFrame
+            the predictions/weights from the Agent
+        ticker_list: List[str]
+            the list of tickers to fetch data for.
+        data: pd.DataFrame
+            the whole period data from the backtester.
+        market_data: pd.DataFrame  
+            dataframde of the market data with the SP500 and the risk-free rate.
+        ----------
         """
         # Extract risk-free rate series
         riskfree_rates = market_data[['^IRX']]/252
@@ -160,9 +247,33 @@ class CAPM_Adjusted_Portfolio(Benchmark):
 
 class InformationRatio(Benchmark):
     def __init__(self, freq='D'):
+        """
+        Constructor for the Information Ratio calculation.
+
+        Parameters
+        ----------
+        freq: str
+            the frequency to group by.
+        ----------
+        Returns None
+        """
         super(InformationRatio, self).__init__(name="InformationRatio", freq=freq)
 
     def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
+        """
+        Calculate the information ratio of the portfolio compared to the market benchmark.
+
+        Parameters
+        ----------
+        weight_predictions: pd.DataFrame
+            the predictions/weights from the Agent
+        ticker_list: List[str]
+            the list of tickers to fetch data for.
+        data: pd.DataFrame
+            the whole period data from the backtester.
+        market_data: pd.DataFrame
+            dataframde of the market data with the SP500 and the risk-free rate.
+        """
 
         market = market_data[['^GSPC']]
 
