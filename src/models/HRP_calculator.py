@@ -177,6 +177,7 @@ class HRP_Calculator:
         q_diag = self.quasi_diagonalization()
         cluster_order = self.get_cluster_pairs()
         weights = np.ones(len(stock_order))  # Initialize weights with 1 for all assets
+        #cov_matrix = self.stats_module.calc_shrinkage_covariance() if self.use_shrinkage else self.stats_module.calc_covariance_matrix()
 
         def allocate_recursive(cluster_order, weights):
             # Iterate through cluster pairs in reversed order

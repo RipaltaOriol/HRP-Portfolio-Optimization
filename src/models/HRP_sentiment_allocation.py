@@ -135,7 +135,7 @@ class HRP_Sentiment(WeightAllocationModel):
         if linear_adjustment:
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * (1 + aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
         else:
-            k = 2.5  # You can adjust k to control the impact of sentiment
+            k = 1.75  # You can adjust k to control the impact of sentiment
             adjusted_weights = {ticker: hrp_weights.get(ticker, 0) * np.exp(k * aggregated_sentiments.get(ticker, 0)) for ticker in ticker_list}
 
         # normalize adjusted weights to sum to 1

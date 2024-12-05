@@ -9,11 +9,16 @@ from ticker_codes import tickers
 import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
+from utils.TickerSelector import TickerSelector
 
 # make sure to pip install -r requirements.txt
 
 start_date = date(2024, 1, 4)
 end_date = date(2024, 4, 29)
+
+selector = TickerSelector()
+returns =selector.calculate_ticker_returns(start_date, end_date)
+tickers_evi = selector.random_selection(returns)
 
 benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
               b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]
@@ -21,12 +26,13 @@ benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfol
 # agents = []
 # months_back determines the amount of data used to make any prediction/weights_allocations
 agents = [Agent(MarketCapWeights()),
-    Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True)),
+          Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = False)),
+          #Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = False)),
           Agent(EqualWeights())]
 
 back_tester = Backtester(start_date=start_date,
                          end_date=end_date,
-                         ticker_list= tickers,
+                         ticker_list= tickers_evi,
                          benchmarks=benchmarks,
                          market_tickers= ['^GSPC','^IRX'] # sp500, 3month rolling yields
                          )
