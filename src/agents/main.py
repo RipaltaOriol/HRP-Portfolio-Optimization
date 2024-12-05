@@ -3,12 +3,38 @@ from agents import WeightAllocationModel
 class Agent:
 
     def __init__(self, model: WeightAllocationModel):
+        """
+        Constructor of the Agent class.
+
+        Parameters
+        ----------
+        model : WeightAllocationModel
+            The model to allocate weights.
+        ----------
+        Returns none
+        """
 
         self.model = model
         self.ticker_list = None
         self.weight_predictions = None
 
     def weights_allocate(self, from_date, to_date, ticker_list, data):
+        """
+        This method is used to allocate weights for the given data.
+        
+        Paramters
+        ----------
+        from_date : datetime.date
+            The start date of the simulation.
+        to_date : datetime.date
+            The end date of the simulation.
+        ticker_list : List[str]
+            The list of tickers to fetch data for.
+        data : pd.DataFrame
+            The whole period data from the backtester.
+        ----------
+        Returns none
+        """
 
         WeightAllocationModel.ticker_list =  self.ticker_list
 
