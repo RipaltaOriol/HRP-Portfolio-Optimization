@@ -8,6 +8,25 @@ from backtester import WeightAllocationModel
 class Backtester:
 
     def __init__(self,start_date, end_date, ticker_list, benchmarks, market_tickers, save=False):
+        """
+        Constructor of the Backtester class.
+        
+        Parameters
+        ----------
+        start_date : datetime.date
+            The start date of the simulation.   
+        end_date : datetime.date
+            The end date of the simulation.
+        ticker_list : List[str]
+            The list of tickers to fetch data for.
+        benchmarks : List[Benchmark]
+            The list of benchmarks to evaluate the agents.
+        market_tickers : List[str]
+            The list of market tickers to fetch data for.
+        save : bool
+            The boolean value to save the simulation results.
+        ----------
+        """
         self.start_date = start_date
         self.end_date = end_date
         self.tickers = sorted(ticker_list)

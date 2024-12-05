@@ -13,6 +13,14 @@ os.environ['SSL_CERT_FILE'] = certifi.where()
 class EqualWeights(WeightAllocationModel):
 
     def __init__(self):
+        """
+        Constructor of the EqualWeights class.
+
+        Parameters
+        ----------
+        None
+        ----------
+        """
         super(EqualWeights, self).__init__()
 
     def date_data_needed(self, date_from, date_to):
@@ -28,12 +36,22 @@ class EqualWeights(WeightAllocationModel):
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         """
         Allocates equal weights to all tickers for the specified date range.
-        :param date_from: First day of predictions.
-        :param date_to: Last day of predictions.
-        :param data: DataFrame containing tickers and their data.
-        :param ticker_list: List of tickers for which weights are to be calculated.
-        :param params: Additional parameters (not used in this method).
-        :return: DataFrame with dates as index, tickers as columns, and equal weights as values.
+
+        Parameters
+        ----------
+        date_from: datetime
+            First day of predictions.
+        date_to: datetime
+            Last day of predictions.
+        data: pd.DataFrame
+            DataFrame containing tickers and their data.
+        ticker_list: List
+            List of tickers for which weights are to be calculated.
+        params: 
+            Additional parameters (not used in this method).
+        ----------
+        
+        Return: DataFrame with dates as index, tickers as columns, and equal weights as values.
         """
 
         rebalancing_dates = pd.date_range(start=date_from, end=date_to, freq='D')
@@ -72,10 +90,14 @@ class MarketCapWeights(WeightAllocationModel):
         """
         Calculate market capitalization asynchronously for multiple tickers on a specific date.
 
-        Args:
-            date: The date for which to calculate market cap.
-            ticker_list: List of tickers to calculate market cap for.
-
+        Parameters
+        ----------
+        date: datetime
+            The date for which to calculate market cap.
+        
+        ticker_list: List
+            List of tickers to calculate market cap for.
+        ----------
         Returns:
             pd.DataFrame: DataFrame of market capitalization for each ticker and the given date.
         """
@@ -94,6 +116,17 @@ class MarketCapWeights(WeightAllocationModel):
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
         """
         Allocate weights based on market capitalization.
+        Parameters
+        ----------
+        date_from: datetime
+            First day of predictions.
+        date_to: datetime
+            Last day of predictions.
+        data: pd.DataFrame
+            DataFrame containing tickers and their data
+        ticker_list: List
+            List of tickers to predict weights for.
+        ----------
         Returns: A DataFrame of weights for each rebalance date.
         """
         weights_list = []
