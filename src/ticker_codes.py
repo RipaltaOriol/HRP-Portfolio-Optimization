@@ -50,17 +50,25 @@ etf_ticker_universe = {'xlb': materials_tickers, 'xlc': communication_services_t
     'xlre': real_estate_tickers}
 
 # "BRK.B" stock was problematic, and was messing up hrp.
-tickers = [
-    "NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "GOOG", "META", "TSLA", "AVGO",
-    "WMT", "JPM", "LLY", "V", "UNH", "XOM", "MA", "COST", "HD", "PG",
-    "NFLX", "JNJ", "CRM", "BAC", "ABBV", "CVX", "TMUS", "KO", "MRK", "WFC",
-    "BX", "CSCO", "ADBE", "ACN", "AMD", "PEP", "NOW", "MS", "LIN", "AXP",
-    "DIS", "IBM", "TXN", "PFE", "TMO", "C", "INTU", "PM", "BMY", "GS",
-    "QCOM", "BKNG", "DHR", "CMCSA", "T", "RTX", "BLK", "SPGI", "AMGN", "UNP",
-    "HON", "MDT", "CAT", "COP", "SLB", "GE", "SBUX", "CHTR", "MDLZ", "CL",
-    "GM", "F", "MMM", "TGT", "LMT", "NOC", "RTX", "BA", "DAL", "LUV",
-    "AAL", "UAL", "MAR", "HLT", "MCD", "YUM", "CMG", "DPZ", "DRI", "BBY",
-    "LOW", "TJX", "ROST", "DG", "DLTR", "AZO", "ORLY", "AAP", "KMX", "TSLA"
-]
+# tickers = [
+#     "NVDA", "AAPL", "MSFT", "AMZN", "GOOGL", "GOOG", "META", "TSLA", "AVGO",
+#     "WMT", "JPM", "LLY", "V", "UNH", "XOM", "MA", "COST", "HD", "PG",
+#     "NFLX", "JNJ", "CRM", "BAC", "ABBV", "CVX", "TMUS", "KO", "MRK", "WFC",
+#     "BX", "CSCO", "ADBE", "ACN", "AMD", "PEP", "NOW", "MS", "LIN", "AXP",
+#     "DIS", "IBM", "TXN", "PFE", "TMO", "C", "INTU", "PM", "BMY", "GS",
+#     "QCOM", "BKNG", "DHR", "CMCSA", "T", "RTX", "BLK", "SPGI", "AMGN", "UNP",
+#     "HON", "MDT", "CAT", "COP", "SLB", "GE", "SBUX", "CHTR", "MDLZ", "CL",
+#     "GM", "F", "MMM", "TGT", "LMT", "NOC", "RTX", "BA", "DAL", "LUV",
+#     "AAL", "UAL", "MAR", "HLT", "MCD", "YUM", "CMG", "DPZ", "DRI", "BBY",
+#     "LOW", "TJX", "ROST", "DG", "DLTR", "AZO", "ORLY", "AAP", "KMX", "TSLA"]
+
+tickers = ['SPGI', 'BKNG', 'LUV', 'PCAR', 'SHW', 'CPT', 'CVX', 'SWK', 'TXT', 'MSFT', 'TRV', 'ZBRA', 'QRVO',
+           'ANSS', 'NI', 'ATO', 'PAYC', 'ALLE', 'PWR', 'PHM', 'SYY', 'IR', 'SNPS', 'HON', 'HPQ', 'BF-B', 'BG',
+           'DAL', 'PEP', 'KHC', 'AMAT', 'ICE', 'VLO', 'COST', 'EVRG', 'ENPH', 'NSC', 'BKR', 'SRE', 'ADBE', 'GLW',
+           'CMG', 'PH', 'TPR', 'J', 'JPM', 'ROK', 'EXPE', 'WMB', 'ADI', 'TSCO', 'HD', 'STX', 'ALB', 'IPG', 'CBOE',
+           'YUM', 'VZ', 'RTX', 'ADSK', 'MDT', 'KEYS', 'PM', 'DTE', 'CSGP', 'EG', 'HRL', 'BEN', 'MGM', 'MA', 'AJG',
+           'CTLT', 'DELL', 'USB', 'WEC', 'NWS', 'DAY', 'C', 'SLB',
+           'MAR', 'DXCM', 'CHTR', 'AMD', 'PGR', 'AMT', 'CVS', 'ROST', 'BALL',
+           'JNJ', 'MSI', 'AZO', 'PANW', 'EFX', 'PKG', 'COP', 'ZBH', 'CL', 'OKE','L','TDY']
 
 polygon_api_key ='LTLVSbi7rBjyjJtCpmLuTDPPhFsNSCyy'
