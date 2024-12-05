@@ -124,7 +124,29 @@ class HRP_Sentiment(WeightAllocationModel):
         return weight_predictions
 
     def add_sentiment(self, start_date, end_date, ticker_list, hrp_weights: pd.Series, rebalance_date: datetime.date, linear_adjustment=False, **params):
+        
+        """
+        
+        Allocates the weights for the given data.
 
+        Parameters
+        ----------
+        start_date : datetime.date
+            The date to start the sentiment analyzer .
+        end_date : datetime.date
+            The date to end the sentiment analyzer.
+        ticker_list : list
+            The list of tickers to allocate the analyzer for.
+        hrp_weights : pd.Series
+            The weights allocated by the HRP model.
+        rebalance_date : datetime.date
+            The date to rebalance the weights.
+        linear_adjustment : bool
+            If True, the sentiment will be adjusted linearly.
+        ----------
+        Returns a pd.DataFrame of the adjusted weights based on sentiment
+        
+        """ 
         # if statement to get polygon data asynchronously or not
         if self.async_getter:
             aggregated_sentiments = self.async_sentiment_getter(start_date, end_date, ticker_list)
@@ -150,6 +172,23 @@ class HRP_Sentiment(WeightAllocationModel):
         return weights_df
 
     def sentiment_getter(self, start_date, end_date, ticker_list, **params):
+        """
+        
+        Allocates the weights for the given data at every rebalance date.
+
+        Parameters
+        ----------
+        start_date : datetime.date
+            The date to start the sentiment analyzer .
+        end_date : datetime.date
+            The date to end the sentiment analyzer.
+        ticker_list : list
+            The list of tickers to allocate the analyzer for.
+        ----------
+        Returns a pd.DataFrame of the adjusted weights based on sentiment calculated 
+        synchronously (not recommended).
+        
+        """ 
 
         sentiment_scores = {}
         aggregated_sentiments = {}
@@ -165,7 +204,23 @@ class HRP_Sentiment(WeightAllocationModel):
         return aggregated_sentiments
 
     def async_sentiment_getter(self, start_date, end_date, ticker_list, **params):
+        """
+        
+        Allocates the weights for the given data at every rebalance date.
 
+        Parameters
+        ----------
+        start_date : datetime.date
+            The date to start the sentiment analyzer .
+        end_date : datetime.date
+            The date to end the sentiment analyzer.
+        ticker_list : list
+            The list of tickers to allocate the analyzer for.
+        ----------
+        Returns a pd.DataFrame of the adjusted weights based on sentiment calculated 
+        asynchronously (recommended).
+        
+        """ 
         sentiment_scores = {}
         aggregated_sentiments = {}
 

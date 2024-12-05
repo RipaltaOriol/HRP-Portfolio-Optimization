@@ -8,15 +8,29 @@ from ticker_codes import polygon_api_key
 
 class MarketCapFetcher:
     def __init__(self):
+        """
+        Initialize the MarketCapFetcher with the Polygon.io API key.
+        
+        Parameters
+        ----------
+        None
+        ----------
+        """
         self.polygon_api_key = polygon_api_key
 
     def get_next_trading_day(self, date):
         """
         Check if the given date is a valid trading day.
         Here we use a random ticker like 'AAPL' to check if the 'date' has been a valid trading day.
-
-        return: date if it is a valid trading day or next available trading day.
+        
+        Parameters
+        ----------
+        date : datetime.date
+            The date to check if it is a valid trading day.
+        ----------
+        Returbn: date if it is a valid trading day or next available trading day.
         """
+        
         k=0
         while True:
             url = f'https://api.polygon.io/v1/open-close/AAPL/{date.strftime("%Y-%m-%d")}'
@@ -42,6 +56,18 @@ class MarketCapFetcher:
     async def fetch_price_data_async(self, session: aiohttp.ClientSession, ticker, date):
         """
         Fetch historical price data for a specific date asynchronously using Polygon.io.
+        
+        Parameters
+        ----------
+        session : aiohttp.ClientSession
+            The aiohttp client session to use for the request.
+        ticker : str
+            The ticker to fetch price data for.
+        date : str
+            The date to fetch price data for.
+        ----------
+        Returns the closing price for the given ticker on the given date.
+        
         """
         url = f"https://api.polygon.io/v1/open-close/{ticker}/{date}"
         params = {"apiKey": self.polygon_api_key}
@@ -62,6 +88,15 @@ class MarketCapFetcher:
     async def fetch_shares_outstanding_async(self, session: aiohttp.ClientSession, ticker):
         """
         Fetch shares outstanding for a ticker asynchronously using Polygon.io.
+        
+        Parameters
+        ----------
+        session : aiohttp.ClientSession
+            The aiohttp client session to use for the request.
+        ticker : str
+            The ticker to fetch shares outstanding for.
+        ----------
+        Returns the shares outstanding for the given ticker.
         """
         url = f"https://api.polygon.io/v3/reference/tickers/{ticker}"
         params = {"apiKey": self.polygon_api_key}
@@ -83,6 +118,17 @@ class MarketCapFetcher:
         """
         Fetch price data and shares outstanding asynchronously for a specific date,
         and calculate market cap for a ticker.
+
+        Parameters
+        ----------
+        session : aiohttp.ClientSession
+            The aiohttp client session to use for the request.
+        ticker : str
+            The ticker to fetch market cap for.
+        date : str 
+            The date to fetch market cap for.
+        ----------
+        Returns a dictionary with the date, ticker, and market cap.
         """
         close_price = await self.fetch_price_data_async(session, ticker, date)
         shares_outstanding = await self.fetch_shares_outstanding_async(session, ticker)

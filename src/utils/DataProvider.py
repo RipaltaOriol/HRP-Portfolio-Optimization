@@ -5,8 +5,22 @@ import datetime
 
 class DataProvider:
     def __init__(self, start: datetime.date, end: datetime.date, tickers: List[str], target: str = "Adj Close") -> None:
+
         """
         Initialize the DataProvider with start and end dates as datetime.date objects, and a list of tickers.
+        
+        Parameters
+        ----------
+        start : datetime.date
+            The start date of the data.
+        end : datetime.date
+            The end date of the data.   
+        tickers : List[str]
+            The list of tickers to fetch data for.
+        target : str
+            The target column to fetch data for. Default is "Adj Close".
+        
+        ----------
         """
         self.tickers = tickers
         self.start = start
@@ -16,9 +30,13 @@ class DataProvider:
 
     def provide(self) -> pd.DataFrame:
         """
-        Main class function which returns the ticker data requested.
-        ----
-        Returns pd.DataFrame with ticker returns for the class date range.
+        Fetches, cleans, and calculates returns for the given data.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns a pd.DataFrame of the cleaned and returns calculated data.
         """
         self.fetch()
         self.clean()
@@ -26,6 +44,14 @@ class DataProvider:
         return self.data[1:]
 
     def fetch(self) -> pd.DataFrame:
+        """
+        Fetches the data from Yahoo Finance API.
+        Parameters
+        ----------
+        None
+        ----------
+        Returns a pd.DataFrame of the fetched data.
+        """
         start_str = self.start.strftime('%Y-%m-%d')
         end_str = self.end.strftime('%Y-%m-%d')
         self.data = yf.download(self.tickers, start=start_str, end=end_str)
@@ -36,7 +62,13 @@ class DataProvider:
 
     def clean(self, brute = True) -> None:
         """
-        Clean up the data
+        Cleans the data by dropping columns with null values.
+        Parameters
+        ----------
+        Brute : bool
+            If True, the data will be cleaned by dropping all columns with null values.
+        ----------
+        Returns a boolean value indicating if the data was cleaned successfully.
         """
         if self.data.isnull().values.any():
             print("The dataset contains null or empty values")
@@ -58,7 +90,12 @@ class DataProvider:
     def calc_returns(self):
         """
         Computes returns for the given data.
-        ----
+
+        Parameters
+        ----------
+        None
+        ----------
+        
         Returns pd.DataFrame with ticker returns.
         """
         self.data = self.data.pct_change()
