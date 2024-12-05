@@ -14,17 +14,35 @@ class HRP_Calculator:
     """
 
     def __init__(self, data, use_shrinkage = True):
-        """
-        pd.DataFrame data: data of ticker returns
-        class RelationalStatistics: module for relational statistics
+        """    
+        Constructor of the HRP_Calculator class.
+        Initializes the data and stats_module attributes.
+
+        Parameters
+        ----------
+        data : pd.DataFrame
+            A pandas DataFrame of asset returns. NOT COVARIANCE MATRIX.
+        use_shrinkage : bool, optional
+            A boolean flag to indicate whether to use shrinkage covariance matrix or not.
+            The default is True.
+        stats_module : RelationalStatistics
+            An instance of the RelationalStatistics class. Uses the functions
+            in RelationalStatistics to calculate statistics.
+        ----------
         """
         self.data = data
         self.stats_module = RelationalStatistics(data)
         self.use_shrinkage = use_shrinkage
 
     def hierarchical_clustering(self) -> np.ndarray:
-        """
-        Performs hierarchical clustering on the euclidean distance matrix.
+        """    
+        This function performs hierarchical clustering on the data using eucledian distance.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns an array of the linkage matrix.
         """
         eucledian_df = self.stats_module.calc_eucledian_distance()
         linkage_matrix = linkage(eucledian_df, 'single')
@@ -34,9 +52,13 @@ class HRP_Calculator:
         """
         Get the cluster pairs in order of merging from the linkage matrix.
 
-        Returns:
-            List[Tuple[List[int], List[int]]]: A list of tuples where each tuple contains
-                                               the left and right clusters being merged.
+        Parameters
+        ----------
+        None
+        ----------
+
+        Returns List[Tuple[List[int], List[int]]]: A list of tuples where each tuple contains
+        the left and right clusters being merged.
         """
         linkage_matrix = self.hierarchical_clustering()
         n_assets = linkage_matrix.shape[0] + 1  # Number of original assets (leaf nodes)
@@ -62,6 +84,13 @@ class HRP_Calculator:
     def get_cluster_order(self) -> List[str]:
         """
         Gets the cluster order from the hierarchical clustering.
+        
+        Parameters
+        ----------
+        None
+        ----------
+
+        Returns list of the merged assets in the order of merging.
         """
         n = self.data.shape[1]  # total number of assets
         linkage_matrix = self.hierarchical_clustering()
@@ -86,6 +115,12 @@ class HRP_Calculator:
         """
         Use the linkage matrix and cluster order to quasi-diagonalize the covariance matrix.
         Such that the highest correlations are along the diagonal.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns pd.DataFrame: A quasi-diagonalized covariance
         """
         cluster_order = self.get_cluster_order()
 
@@ -105,6 +140,16 @@ class HRP_Calculator:
         """
         Calculate the variance for a given cluster by summing the diagonal values
         from the covariance matrix for the assets in the cluster.
+
+        Parameters
+        ----------
+        cluster : List[int]
+            A list of asset indices in the cluster.
+        cov_matrix : np.ndarray
+            The covariance matrix of the assets.
+        ----------
+
+        Returns the total variance of the cluster.
         """
         # If the cluster contains sub-clusters, recursively calculate the variance
         cluster_cov = cov_matrix[np.ix_(cluster, cluster)]
@@ -115,6 +160,17 @@ class HRP_Calculator:
         return total_variance
 
     def weights_allocate(self):
+        """
+        Calculate the weights for the assets in the portfolio using Hierarchical Risk Parity (HRP).
+        Makes use of the quasi-diagonalized covariance matrix to allocate weights.
+
+        Parameters
+        ----------
+        None
+        ----------
+        Returns Dict[str, float]: A dictionary of asset tickers and their corresponding
+        weights in the portfolio.
+        """
         # Initialize required variables
         H_clustering = self.hierarchical_clustering()
         stock_order = self.get_cluster_order()

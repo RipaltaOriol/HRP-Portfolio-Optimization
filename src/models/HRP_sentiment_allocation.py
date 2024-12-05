@@ -15,6 +15,24 @@ os.environ['SSL_CERT_FILE'] = certifi.where()
 
 class HRP_Sentiment(WeightAllocationModel):
     def __init__(self, months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = True):
+        """
+        
+        Constructor of the HRP_Calculator class.
+        Initializes the data and stats_module attributes.
+
+        Parameters
+        ----------
+        months_back : int
+            The number of months to look back for the historical data.
+        include_sentiment : bool
+            If True, the sentiment analysis will be included in the allocation.
+        async_getter : bool
+            If True, the sentiment analysis will be fetched asynchronously.
+        is_shrinkage : bool
+            If True, the covariance matrix will be shrinked.
+        ----------
+        
+        """
         super(HRP_Sentiment, self).__init__()
         self.months_back = months_back
         self.include_sentiment = include_sentiment
@@ -34,10 +52,41 @@ class HRP_Sentiment(WeightAllocationModel):
         else:
             return f"HRP_NoSentiment_NoSentiment".__hash__()
 
-    def date_data_needed(self, date_from, date_to):
+    def date_data_needed(self, date_from) -> datetime.date:
+        """
+        
+        Returns the date needed for the historical data.
+
+        Parameters
+        ----------
+        date_from : datetime.date
+            The date to start the allocation from.
+        ----------
+        Returns a datetime.date objectm of the window of time needed for the historical data.
+        
+        """        
         return date_from - pd.DateOffset(months=self.months_back)
 
     def weights_allocate(self, date_from, date_to, ticker_list, data, **params):
+
+        """
+        
+        Allocates the weights for the given data.
+
+        Parameters
+        ----------
+        date_from : datetime.date
+            The date to start the allocation from.
+        date_to : datetime.date
+            The date to end the allocation.
+        ticker_list : list
+            The list of tickers to allocate the weights for.
+        data : pd.DataFrame
+            The returns data of the tickers 
+        ----------
+        Returns a pd.DataFrame of the weights allocated for the tickers.
+        
+        """  
         weights_list = []
 
         for rebalance_date in pd.date_range(start=date_from, end=date_to, freq='MS'):
