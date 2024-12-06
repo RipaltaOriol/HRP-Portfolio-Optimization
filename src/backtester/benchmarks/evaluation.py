@@ -185,7 +185,7 @@ class Beta(Benchmark):
         return beta_df
 
 
-class CAPM_Adjusted_Portfolio(Benchmark):
+class CAPM_Adjusted_Market_Portfolio(Benchmark):
     def __init__(self, freq='D', beta_model=0.5):
         """
         Constructor for the CAPM adjusted portfolio calculation.
@@ -199,7 +199,7 @@ class CAPM_Adjusted_Portfolio(Benchmark):
         ----------
         Returns None
         """
-        super(CAPM_Adjusted_Portfolio, self).__init__(name="CAPM_Adjusted_Portfolio", freq=freq)
+        super(CAPM_Adjusted_Market_Portfolio, self).__init__(name="CAPM_Adjusted_Market_Portfolio", freq=freq)
         self.beta = None
         if self.freq == 'D' or self.freq == 'W':
             raise ValueError('CAPM analysis not support for D or W frequency')
