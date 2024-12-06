@@ -25,7 +25,7 @@ class HRP_Sentiment(WeightAllocationModel):
         Parameters
         ----------
         months_back : int
-            The number of months to look back for the historical data.
+            The number of months to look back for the historical data. Controls the lookback period for the covariance matrix data for HRP
         include_sentiment : bool
             If True, the sentiment analysis will be included in the allocation.
         async_getter : bool

@@ -19,8 +19,8 @@ end_date = date(2024, 10, 1)
 benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
               b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]
 
-# agents = []
-# months_back determines the amount of data used to make any prediction/weights_allocations
+
+
 agents = [Agent(MarketCapWeights()),
           Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = False)),
           Agent(HRP_Sentiment(months_back=3, include_sentiment=True, async_getter=True, is_shrinkage = False)),
