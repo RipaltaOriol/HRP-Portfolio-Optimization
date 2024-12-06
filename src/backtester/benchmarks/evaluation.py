@@ -62,7 +62,7 @@ class Sharpe(Benchmark):
         super(Sharpe, self).__init__(name="Sharpe", freq=freq)
         self.risk_free_rate = risk_free_rate
 
-    def calculate(self, weight_predictions, data, market_data, **kwargs):
+    def calculate(self, weight_predictions, ticker_list, data, market_data, **kwargs):
         """
         Calculate the Sharpe ratio of the portfolio.
 
