@@ -22,7 +22,7 @@ def plot_weights(hrp_weights, period):
 
     plt.xlabel('Stock Number', fontsize=12)
     plt.ylabel('Weight', fontsize=12)
-    plt.title(f'HRP Weights for the {period}-month period', fontsize=14)
+    plt.title(f'Final model Weights for the {period}-month period', fontsize=14)
 
     plt.xticks(stock_numbers)
     plt.grid(axis='y', linestyle='--', alpha=0.7)
