@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 
 
-def plot_hrp_weights(hrp_weights, period):
+def plot_weights(hrp_weights, period):
     """
     Plots the HRP weights for the given period.
 
