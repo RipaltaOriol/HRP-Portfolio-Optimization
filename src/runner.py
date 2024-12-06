@@ -16,10 +16,6 @@ from utils.TickerSelector import TickerSelector
 start_date = date(2020, 1, 4)
 end_date = date(2024, 10, 1)
 
-#selector = TickerSelector()
-#returns =selector.calculate_ticker_returns(start_date, end_date)
-#tickers_evi = selector.random_selection(returns)
-
 benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
               b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]
 
@@ -30,7 +26,6 @@ agents = [Agent(MarketCapWeights()),
           Agent(HRP_Sentiment(months_back=3, include_sentiment=True, async_getter=True, is_shrinkage = False)),
           Agent(HRP_Sentiment(months_back=3, include_sentiment=True, async_getter=True, is_shrinkage = True)),
           Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = True)),
-          #Agent(HRP_Sentiment(months_back=3, include_sentiment=False, async_getter=True, is_shrinkage = False)),
           Agent(EqualWeights())]
 
 back_tester = Backtester(start_date=start_date,
