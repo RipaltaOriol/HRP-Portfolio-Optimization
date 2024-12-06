@@ -16,8 +16,8 @@ from utils.TickerSelector import TickerSelector
 start_date = date(2024, 7, 1)
 end_date = date(2024, 10, 1)
 
-benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Portfolio('YM'), b.InformationRatio('YM'),
-              b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Portfolio('P'), b.InformationRatio('P')]
+benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Market_Portfolio('YM'), b.InformationRatio('YM'),
+              b.PNL('P'), b.Sharpe('P'), b.Beta('P'), b.CAPM_Adjusted_Market_Portfolio('P'), b.InformationRatio('P')]
 
 
 
