@@ -10,6 +10,8 @@ from aiohttp import ClientSession
 import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
+import nest_asyncio
+nest_asyncio.apply()
 
 
 class SentimentAnalyzer:

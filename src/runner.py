@@ -13,7 +13,7 @@ from utils.TickerSelector import TickerSelector
 
 # make sure to pip install -r requirements.txt
 
-start_date = date(2024, 7, 1)
+start_date = date(2024, 1, 1)
 end_date = date(2024, 10, 1)
 
 benchmarks = [b.PNL('YM'), b.Sharpe('YM'), b.Beta('YM'), b.CAPM_Adjusted_Market_Portfolio('YM'), b.InformationRatio('YM'),

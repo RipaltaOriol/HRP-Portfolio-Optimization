@@ -13,6 +13,8 @@ import os
 import certifi
 os.environ['SSL_CERT_FILE'] = certifi.where()
 from deepdiff import DeepHash
+import nest_asyncio
+nest_asyncio.apply()
 
 
 class HRP_Sentiment(WeightAllocationModel):
@@ -156,7 +158,11 @@ class HRP_Sentiment(WeightAllocationModel):
         """ 
         # if statement to get polygon data asynchronously or not
         if self.async_getter:
-            aggregated_sentiments = self.async_sentiment_getter(start_date, end_date, ticker_list)
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                aggregated_sentiments = loop.run_until_complete(self.async_sentiment_getter(start_date, end_date, ticker_list))
+            else:
+                aggregated_sentiments = asyncio.run(self.async_sentiment_getter(start_date, end_date, ticker_list))
         else:
             aggregated_sentiments = self.sentiment_getter(start_date, end_date, ticker_list)
 
@@ -210,7 +216,7 @@ class HRP_Sentiment(WeightAllocationModel):
 
         return aggregated_sentiments
 
-    def async_sentiment_getter(self, start_date, end_date, ticker_list, **params):
+    async def async_sentiment_getter(self, start_date, end_date, ticker_list, **params):
         """
         
         Allocates the weights for the given data at every rebalance date.
@@ -231,7 +237,7 @@ class HRP_Sentiment(WeightAllocationModel):
         sentiment_scores = {}
         aggregated_sentiments = {}
 
-        news = asyncio.run(self.sentiment_analyzer.fetch_all_ticker_news(start_date, end_date, ticker_list))
+        news = await self.sentiment_analyzer.fetch_all_ticker_news(start_date, end_date, ticker_list)
         for ticker, ticker_news in zip(ticker_list, news):
             filtered_news = [article for article in ticker_news if article['publisher']['homepage_url'] != 'https://www.zacks.com/']
             ticker_news = filtered_news

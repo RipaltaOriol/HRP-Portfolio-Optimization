@@ -4,6 +4,8 @@ import pandas as pd
 import requests
 import datetime
 from ticker_codes import polygon_api_key
+import nest_asyncio
+nest_asyncio.apply()
 
 
 class MarketCapFetcher:

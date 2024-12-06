@@ -7,6 +7,8 @@ import aiohttp
 import asyncio
 import os
 import certifi
+import nest_asyncio
+nest_asyncio.apply()
 os.environ['SSL_CERT_FILE'] = certifi.where()
 
 
